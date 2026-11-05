@@ -11,7 +11,7 @@
 - `about.html`：新台幣鈔幣、流通紀念幣與紀念鈔券介紹。
 - `life-applications.html`：以二年級錢幣應用為基礎，延伸三年級估算與四年級取概數的原創情境練習，並列對應課綱領域文字。
 - `styles.css`：三個頁面共用的響應式樣式及互動狀態。
-- `assets/cash-icons.svg`：計算器使用的原創 Q 版面額圖示。
+- `assets/cash-icons.svg`：計算器使用的原創 Q 版面額圖示，按各面額照片的主要色系作近似配色。
 - `assets/central-bank/`：新台幣介紹頁使用的央行照片；來源及授權見同目錄的 `CREDITS.md`。
 
 ## 金額表示與組合計算
