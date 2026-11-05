@@ -36,6 +36,18 @@ test('supports half-dollar calculations only when enabled', () => {
   assert.ok(result.solutions.some((solution) => solution.counts['coin-1'] === 1 && solution.counts['coin-half'] === 1));
 });
 
+test('keeps the 5-jiao toggle and selected denomination in sync', () => {
+  const preferences = { selected: new Set(['coin-1']), halfEnabled: true };
+  calc.syncHalfDollarSelection(preferences);
+  assert.equal(preferences.selected.has('coin-half'), true);
+  const result = calc.calculate({ amount: '1.5', allowHalf: preferences.halfEnabled, mode: 'coins', selection: preferences.selected });
+  assert.ok(result.solutions.some((solution) => solution.counts['coin-half'] > 0));
+
+  preferences.halfEnabled = false;
+  calc.syncHalfDollarSelection(preferences);
+  assert.equal(preferences.selected.has('coin-half'), false);
+});
+
 test('mode and custom denomination filters are honored', () => {
   const selected = new Set(['note-500', 'note-200', 'note-100', 'coin-50', 'coin-1']);
   const notesOnly = calc.denominationChoices(selected, 'notes', false);

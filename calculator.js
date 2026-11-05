@@ -70,6 +70,12 @@
     });
   }
 
+  function syncHalfDollarSelection(preferences) {
+    if (preferences.halfEnabled) preferences.selected.add('coin-half');
+    else preferences.selected.delete('coin-half');
+    return preferences;
+  }
+
   function countCombinations(targetTicks, denoms) {
     if (targetTicks < 0 || !denoms.length) return 0n;
     const common = denoms.reduce((value, denom) => gcd(value, denom.ticks), 0);
@@ -272,11 +278,11 @@
         const valid = Array.isArray(stored.selected) ? stored.selected.filter((id) => DENOMINATIONS.some((denom) => denom.id === id)) : DEFAULT_SELECTED;
         const selected = new Set(valid);
         if (!selected.size) DEFAULT_SELECTED.forEach((id) => selected.add(id));
-        return {
+        return syncHalfDollarSelection({
           selected,
           halfEnabled: Boolean(stored.halfEnabled),
           mode: ['all', 'notes', 'coins'].includes(stored.mode) ? stored.mode : 'all',
-        };
+        });
       } catch {
         return { selected: new Set(DEFAULT_SELECTED), halfEnabled: false, mode: 'all' };
       }
@@ -531,6 +537,7 @@
     });
     doc.getElementById('half-dollar').addEventListener('change', (event) => {
       preferences.halfEnabled = event.currentTarget.checked;
+      syncHalfDollarSelection(preferences);
       updateSelectionSummary();
       savePreferences();
       scheduleCalculation(true, true);
@@ -575,6 +582,7 @@
     MAX_LIST_LIMIT,
     parseAmount,
     denominationChoices,
+    syncHalfDollarSelection,
     countCombinations,
     buildExtremes,
     createSolutions,
