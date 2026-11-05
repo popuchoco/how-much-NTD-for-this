@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f3ec" />
+    <meta name="description" content="輸入新台幣金額，列出紙鈔與硬幣的所有精確拆分組合。" />
+    <title>新台幣拆鈔計算器｜現金怎麼配</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./calculator.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳至計算器</a>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="現金怎麼配，回到頁首">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <rect x="4.5" y="7.5" width="19" height="15" rx="2.5" stroke="currentColor" stroke-width="1.8" />
+            <path d="M9 12.25h10M9 17.25h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            <circle cx="23.5" cy="21.5" r="5" fill="#f5f3ec" stroke="currentColor" stroke-width="1.8" />
+            <path d="M22 21.5h3M23.5 20v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          </svg>
+        </span>
+        <span class="brand-name">現金怎麼配</span>
+      </a>
+      <nav class="top-nav" aria-label="主要導覽">
+        <a class="top-nav-link is-current" href="./index.html" aria-current="page">計算器</a>
+        <a class="top-nav-link" href="./about.html">新台幣介紹</a>
+      </nav>
+    </header>
+
+    <main id="main" class="page-shell">
+      <section class="intro" id="top" aria-labelledby="page-title">
+        <p class="eyebrow"><span class="eyebrow-line"></span>新台幣拆鈔計算器</p>
+        <h1 id="page-title">一筆金額，<br class="mobile-break" /><span>有幾種配法？</span></h1>
+        <p class="intro-copy">輸入金額，查看紙鈔與硬幣的精確組合。只算一般流通面額，不含紀念幣或特殊鈔券。</p>
+      </section>
+
+      <section class="calculator-layout" aria-label="現金拆分工具">
+        <aside class="input-panel" aria-labelledby="input-title">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">01 / 輸入與篩選</p>
+              <h2 id="input-title">設定金額</h2>
+            </div>
+            <span class="panel-index" aria-hidden="true">NT$</span>
+          </div>
+
+          <form id="calculator-form" novalidate>
+            <label class="amount-label" for="amount">要拆分的金額</label>
+            <div class="amount-field" id="amount-field">
+              <span class="currency-prefix" aria-hidden="true">NT$</span>
+              <input id="amount" name="amount" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="例如 1,280" aria-describedby="amount-help amount-error" />
+              <span class="amount-suffix" aria-hidden="true">元</span>
+            </div>
+            <p class="field-help" id="amount-help">支援整數；啟用輔角後也可輸入 .5。</p>
+            <p class="field-error" id="amount-error" role="alert" hidden></p>
+
+            <fieldset class="mode-fieldset">
+              <legend>使用方式</legend>
+              <div class="mode-options">
+                <label class="mode-option">
+                  <input type="radio" name="mode" value="all" checked />
+                  <span>鈔票＋硬幣</span>
+                </label>
+                <label class="mode-option">
+                  <input type="radio" name="mode" value="notes" />
+                  <span>僅紙鈔</span>
+                </label>
+                <label class="mode-option">
+                  <input type="radio" name="mode" value="coins" />
+                  <span>僅硬幣</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="half-toggle-row">
+              <svg class="half-coin-icon" aria-hidden="true"><use href="./assets/cash-icons.svg#coin-half"></use></svg>
+              <div class="half-copy">
+                <span class="toggle-title">計算 5 角</span>
+                <span class="toggle-description">納入 NT$0.5 硬幣</span>
+              </div>
+              <label class="switch" aria-label="啟用 5 角硬幣">
+                <input id="half-dollar" type="checkbox" />
+                <span class="switch-track" aria-hidden="true"><span></span></span>
+              </label>
+            </div>
+
+            <details class="denomination-settings" id="denomination-settings">
+              <summary>
+                <span class="summary-title">自訂可用面額</span>
+                <span class="summary-note" id="selection-summary">目前全選</span>
+                <svg class="chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </summary>
+              <div class="denomination-content">
+                <div class="denomination-group">
+                  <div class="group-heading"><h3>紙鈔</h3><div class="group-actions"><button type="button" data-select-group="notes">全選</button><button type="button" data-clear-group="notes">清除</button></div></div>
+                  <div class="denomination-grid" id="note-denominations"></div>
+                </div>
+                <div class="denomination-group">
+                  <div class="group-heading"><h3>硬幣</h3><div class="group-actions"><button type="button" data-select-group="coins">全選</button><button type="button" data-clear-group="coins">清除</button></div></div>
+                  <div class="denomination-grid" id="coin-denominations"></div>
+                </div>
+                <p class="filter-hint">僅列一般流通面額；不含 NT$50 紙鈔、紀念幣或特殊鈔券。</p>
+              </div>
+            </details>
+
+            <button class="calculate-button" type="submit">
+              <span>開始拆分</span>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M10.5 5.5 15 10l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </button>
+          </form>
+          <p class="privacy-note"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2m-8 .5h9v6h-9z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" /></svg>偏好只儲存在這個瀏覽器，不會上傳。</p>
+        </aside>
+
+        <section class="results-panel" aria-labelledby="results-title" aria-live="polite" aria-busy="false">
+          <div class="results-topline">
+            <div>
+              <p class="section-kicker">02 / 拆分結果</p>
+              <h2 id="results-title">所有配法</h2>
+            </div>
+            <span class="result-status" id="result-status"><span class="status-dot"></span>等待金額</span>
+          </div>
+
+          <div class="empty-state" id="empty-state">
+            <div class="empty-illustration" aria-hidden="true">
+              <svg viewBox="0 0 160 118" fill="none">
+                <path d="M23 75.5 79 44l56 31.5-56 31.5-56-31.5Z" fill="#e8e5da" stroke="#9eaa9f" stroke-width="1.5" />
+                <path d="m23 75.5 56 31.5v-25L23 50.5v25Z" fill="#d9ddd1" stroke="#9eaa9f" stroke-width="1.5" />
+                <path d="m135 75.5-56 31.5v-25l56-31.5v25Z" fill="#c6d0c3" stroke="#9eaa9f" stroke-width="1.5" />
+                <path d="m49 53 24-13 25 14-24 14-25-15Z" fill="#fffdf8" stroke="#c6c6b9" stroke-width="1.5" />
+                <path d="m55 50 18-10 18 10-18 10-18-10Z" fill="#e9bd72" stroke="#a97d35" stroke-width="1.5" />
+                <circle cx="112" cy="35" r="13" fill="#f4f3eb" stroke="#b6442b" stroke-width="1.5" />
+                <path d="M107 35h10m-5-5v10" stroke="#b6442b" stroke-width="1.6" stroke-linecap="round" />
+                <path d="M47 30h17M55.5 21.5v17" stroke="#7f9785" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            </div>
+            <h3>先輸入一個金額</h3>
+            <p>系統會列出可用面額的組合，並標出件數最少、硬幣最多與紙鈔最少的解法。</p>
+            <div class="example-prompt"><span class="example-mark">試試</span><span>NT$1,280</span><span aria-hidden="true">→</span><span>看有幾種配法</span></div>
+          </div>
+
+          <div class="result-content" id="result-content" hidden>
+            <div class="amount-result">
+              <span class="result-label">拆分金額</span>
+              <strong id="result-amount">NT$0</strong>
+              <span class="combination-count" id="combination-count">0 種組合</span>
+            </div>
+
+            <div class="extremes" id="extremes" aria-label="代表性解法"></div>
+
+            <div class="list-heading">
+              <div><h3>組合明細</h3><p id="list-caption">依總件數由少到多排列</p></div>
+              <span class="list-count" id="list-count"></span>
+            </div>
+            <div class="combination-list" id="combination-list"></div>
+            <p class="truncation-note" id="truncation-note" hidden></p>
+            <button class="load-more-button" id="load-more" type="button" hidden>再顯示 100 組</button>
+          </div>
+
+          <div class="no-solution" id="no-solution" hidden>
+            <span class="no-solution-icon" aria-hidden="true">!</span>
+            <h3>目前的面額無法剛好湊出</h3>
+            <p>請試著開啟更小的面額，或切換紙鈔與硬幣的使用方式。</p>
+          </div>
+        </section>
+      </section>
+
+      <footer class="page-footer">
+        <span>現金怎麼配 <span aria-hidden="true">·</span> 新台幣面額拆分工具</span>
+        <span>計算在你的瀏覽器中完成</span>
+      </footer>
+    </main>
+  </body>
+</html>
