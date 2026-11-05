@@ -27,6 +27,7 @@ The about page pairs the two faces of each denomination in a compact, labeled ph
 ## Accessibility baseline
 
 - Visible labels and helper/error text remain attached to controls.
+- Calculation updates use a compact `role="status"` announcement instead of putting the full combination list in a live region.
 - Keyboard focus is explicit and uses a consistent 3px ring.
 - Main interactive controls provide at least a 44px target; responsive layouts reflow without horizontal scrolling.
 - Reduced-motion preferences remain respected; content does not depend on animation or color alone.

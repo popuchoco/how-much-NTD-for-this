@@ -1,38 +1,52 @@
 # 現金怎麼配｜新台幣拆鈔計算器
 
-輸入新台幣金額，列出一般流通紙鈔與硬幣的精確拆分方式。純前端、免安裝、可離線使用；使用者自訂的面額偏好只存在瀏覽器的 `localStorage`。
+輸入一筆新台幣金額，查看可用紙鈔與硬幣的所有精確拆分組合，也可比較件數最少、硬幣最多與紙鈔最少的代表解。這是純前端靜態網站，免安裝、無外部執行期依賴；自訂面額偏好只存於目前瀏覽器。
+
+- **公開網站：**[現金怎麼配](https://ntd-cash-splitter.duskylark33.chatgpt.site/)
+- **公開原始碼：**[popuchoco/how-much-NTD-for-this](https://github.com/popuchoco/how-much-NTD-for-this)
 
 ## 功能
 
-- 紙鈔：NT$2,000、1,000、500、200、100。
-- 硬幣：NT$50、20、10、5、1；可選擇啟用 NT$0.5（5 角）。
-- 顯示精確組合數與組合明細；代表解包括總件數最少、硬幣枚數最多、紙鈔張數最少。
-- 可切換紙鈔＋硬幣、僅紙鈔、僅硬幣，並自訂可用面額。
-- 提供「新台幣介紹」畫面：一般面額展示中央銀行公布的鈔幣正反面照片，並列出設計主題與發行日期；計算器仍以原創 Q 版 SVG 圖示辨認面額。
-- 另設「流通紀念幣」區；紀念幣只作介紹，不進入計算。
-- 偏好記在目前瀏覽器，不會上傳；金額不會儲存。
-- 不含紀念幣、特殊鈔券或 NT$50 紙鈔。
-- 單筆金額上限 NT$200,000；組合很多時保留精確總數與代表解，明細一次顯示 100 種、最多可載入 500 種以維持頁面流暢。
-- 本專案文字與原創內容依 GNU Free Documentation License 1.2 授權，完整條文見 `LICENSE`。中央銀行照片素材採獨立的政府資料開放授權條款第 1 版，來源與授權說明見 `assets/central-bank/CREDITS.md`。
+- 紙鈔面額：NT$2,000、1,000、500、200、100。
+- 硬幣面額：NT$50、20、10、5、1；5 角（NT$0.5）可選擇啟用。
+- 可使用紙鈔與硬幣、僅紙鈔或僅硬幣，並自訂要納入計算的面額。
+- 顯示精確組合總數、組合明細與代表解；明細預設列出 100 組，最多載入 500 組。
+- 自訂面額、計算模式與 5 角偏好記在 `localStorage`；金額不會儲存或上傳。
+- 新台幣介紹頁以中央銀行照片介紹鈔幣設計與發行日期；流通紀念幣另成一區，且不納入計算器。
+- 不計算特殊鈔券、紀念幣或 NT$50 紙鈔。
+- 單筆輸入上限為 NT$200,000；不符合目前可用面額的金額會顯示原因。
 
-## 本機預覽
+## 計算方式
 
-直接開啟 `index.html`，或在專案目錄執行：
+半元以整數 tick 儲存（NT$1 = 2 ticks、NT$0.5 = 1 tick），避免浮點誤差。計數器先用面額 ticks 的最大公因數縮放狀態空間，再用完全背包動態規劃精確計算組合數（`BigInt`）。代表解由多組動態規劃分別求得；組合明細採有上限的回溯列舉。完整設計、複雜度與目前邊界請見 [`ARCHITECTURE.md`](ARCHITECTURE.md)。
+
+## 文件
+
+- [`ARCHITECTURE.md`](ARCHITECTURE.md)：資料模型、演算法、限制與程式審查追蹤。
+- [`DESIGN.md`](DESIGN.md)：跨頁視覺方向與無障礙基線。
+- [`assets/central-bank/CREDITS.md`](assets/central-bank/CREDITS.md)：中央銀行照片來源、授權與歸屬說明。
+- [`LICENSE`](LICENSE)：專案授權條款。
+
+## 本機預覽與測試
+
+無需建置或安裝套件。可直接開啟 `index.html`，或在專案目錄執行：
 
 ```sh
 python -m http.server 8000
 ```
 
-再瀏覽 `http://localhost:8000`。不需要 Go 或套件安裝：計算完全在瀏覽器端進行，使用簡單靜態頁面即可發布到 GitHub Pages。
-
-## 測試
+再瀏覽 `http://localhost:8000`。執行測試：
 
 ```sh
 node --test
 ```
 
-紙鈔及硬幣的圖案與發行日期整理自[中央銀行新臺幣鈔票資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t02.html)、[流通硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t04.htm)與[中華民國建國一百年流通拾圓硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/A2/100th10.htm)。中央銀行照片依其[政府網站資料開放宣告](https://www.cbc.gov.tw/tw/cp-307-36676-DE020-1.html)與[政府資料開放授權條款第 1 版](https://data.gov.tw/license)標示使用；照片不裁切、不重繪，詳細來源見 `assets/central-bank/CREDITS.md`。
+## 來源與授權
 
-## 發布
+鈔幣圖案與發行日期整理自[中央銀行新臺幣鈔票資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t02.html)、[流通硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t04.htm)與[建國一百年流通拾圓硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/A2/100th10.htm)。中央銀行照片依其[政府網站資料開放宣告](https://www.cbc.gov.tw/tw/cp-307-36676-DE020-1.html)及[政府資料開放授權條款第 1 版](https://data.gov.tw/license)標示使用；照片素材不屬於本專案的 GFDL 授權範圍，詳細資訊見 `CREDITS.md`。
 
-原始碼已推送到指定 GitHub repository。此 repository 目前為 private，GitHub Pages 依目前帳戶方案無法啟用；靜態檔可在公開 repository 或支援 Pages 的方案下發布，也可透過 ChatGPT Sites 部署為私人頁面。
+本專案以 **GNU Free Documentation License 1.2（GFDL 1.2）** 授權。使用照片時請依其各自授權與來源標示辦理。
+
+## 發布狀態
+
+原始碼倉庫與 ChatGPT Site 均為公開。網站目前部署於上述 ChatGPT Site；GitHub Pages 尚未配置。

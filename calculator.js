@@ -16,6 +16,8 @@
   const MAX_AMOUNT_TWD = 200000;
   const LIST_LIMIT = 100;
   const MAX_LIST_LIMIT = 500;
+  const DP_INFINITY = 0x3fffffff;
+  const CALCULATION_DEBOUNCE_MS = 140;
   const DENOMINATIONS = [
     { id: 'note-2000', kind: 'note', value: 2000, ticks: 4000, label: '$2,000', type: '鈔' },
     { id: 'note-1000', kind: 'note', value: 1000, ticks: 2000, label: '$1,000', type: '鈔' },
@@ -88,15 +90,14 @@
     if (targetTicks % common !== 0) return null;
     const target = targetTicks / common;
     const values = denoms.map((denom) => ({ ...denom, scaled: denom.ticks / common }));
-    const unreachable = 0x3fffffff;
     const fewestPieces = new Int32Array(target + 1);
     const fewestNotes = new Int32Array(target + 1);
     const mostCoins = new Int32Array(target + 1);
     const prevFewestPieces = new Int32Array(target + 1);
     const prevFewestNotes = new Int32Array(target + 1);
     const prevMostCoins = new Int32Array(target + 1);
-    fewestPieces.fill(unreachable);
-    fewestNotes.fill(unreachable);
+    fewestPieces.fill(DP_INFINITY);
+    fewestNotes.fill(DP_INFINITY);
     mostCoins.fill(-1);
     fewestPieces[0] = 0;
     fewestNotes[0] = 0;
@@ -105,12 +106,12 @@
     for (const denom of values) {
       for (let amount = denom.scaled; amount <= target; amount += 1) {
         const prior = amount - denom.scaled;
-        if (fewestPieces[prior] !== unreachable && fewestPieces[prior] + 1 < fewestPieces[amount]) {
+        if (fewestPieces[prior] !== DP_INFINITY && fewestPieces[prior] + 1 < fewestPieces[amount]) {
           fewestPieces[amount] = fewestPieces[prior] + 1;
           prevFewestPieces[amount] = denom.scaled;
         }
         const noteCost = denom.kind === 'note' ? 1 : 0;
-        if (fewestNotes[prior] !== unreachable && fewestNotes[prior] + noteCost < fewestNotes[amount]) {
+        if (fewestNotes[prior] !== DP_INFINITY && fewestNotes[prior] + noteCost < fewestNotes[amount]) {
           fewestNotes[amount] = fewestNotes[prior] + noteCost;
           prevFewestNotes[amount] = denom.scaled;
         }
@@ -136,10 +137,10 @@
       return counts;
     }
 
-    if (fewestPieces[target] === unreachable) return null;
+    if (fewestPieces[target] === DP_INFINITY) return null;
     return {
       fewestPieces: reconstruct(prevFewestPieces, true),
-      fewestNotes: reconstruct(prevFewestNotes, fewestNotes[target] !== unreachable),
+      fewestNotes: reconstruct(prevFewestNotes, fewestNotes[target] !== DP_INFINITY),
       mostCoins: reconstruct(prevMostCoins, mostCoins[target] >= 0),
     };
   }
@@ -198,9 +199,45 @@
     const parsed = parseAmount(amount, allowHalf);
     if (!parsed.ok) return { ok: false, error: parsed.reason };
     const denoms = denominationChoices(selection, mode, allowHalf);
-    if (!denoms.length) return { ok: true, parsed, denoms, ways: 0n, solutions: [], extremes: null, truncated: false };
+    if (!denoms.length) {
+      return {
+        ok: true,
+        parsed,
+        denoms,
+        ways: 0n,
+        solutions: [],
+        extremes: null,
+        truncated: false,
+        noSolutionReason: '目前沒有可用面額，請選擇至少一種紙鈔或硬幣。',
+      };
+    }
+    const commonUnitTicks = denoms.reduce((value, denom) => gcd(value, denom.ticks), 0);
+    if (parsed.ticks % commonUnitTicks !== 0) {
+      const commonUnit = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 1 }).format(commonUnitTicks / 2);
+      return {
+        ok: true,
+        parsed,
+        denoms,
+        ways: 0n,
+        solutions: [],
+        extremes: null,
+        truncated: false,
+        noSolutionReason: `目前面額的共同單位為 NT$${commonUnit}，無法整除這筆金額；請啟用更小面額或 5 角。`,
+      };
+    }
     const ways = countCombinations(parsed.ticks, denoms);
-    if (ways === 0n) return { ok: true, parsed, denoms, ways, solutions: [], extremes: null, truncated: false };
+    if (ways === 0n) {
+      return {
+        ok: true,
+        parsed,
+        denoms,
+        ways,
+        solutions: [],
+        extremes: null,
+        truncated: false,
+        noSolutionReason: '這些面額的共同單位可整除該金額，但仍無法以目前面額組成；請加入較小面額。',
+      };
+    }
     const extremes = buildExtremes(parsed.ticks, denoms);
     const solutions = createSolutions(parsed.ticks, denoms, ways, listLimit);
     const ranked = [...solutions].sort((a, b) => {
@@ -386,6 +423,7 @@
         empty.hidden = true;
         content.hidden = true;
         noSolution.hidden = false;
+        doc.getElementById('no-solution-message').textContent = result.noSolutionReason || '請試著開啟更小的面額，或切換紙鈔與硬幣的使用方式。';
         status.classList.remove('is-ready');
         status.lastChild.textContent = '無法精確湊出';
         resultPanel.setAttribute('aria-busy', 'false');
@@ -478,7 +516,7 @@
     function scheduleCalculation(showError, resetList = false) {
       clearTimeout(debounceTimer);
       if (resetList) visibleLimit = LIST_LIMIT;
-      debounceTimer = setTimeout(() => calculateNow(showError), 140);
+      debounceTimer = setTimeout(() => calculateNow(showError), CALCULATION_DEBOUNCE_MS);
     }
 
     renderDenominationOptions();

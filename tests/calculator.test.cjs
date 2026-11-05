@@ -45,6 +45,18 @@ test('mode and custom denomination filters are honored', () => {
   assert.equal(calc.DENOMINATIONS.some((denom) => denom.id === 'note-50'), false);
 });
 
+test('explains amounts outside the selected denominations common unit', () => {
+  const result = calc.calculate({ amount: '1', allowHalf: false, selection: new Set(['coin-20', 'coin-50']) });
+  assert.equal(result.ways, 0n);
+  assert.match(result.noSolutionReason, /共同單位為 NT\$10/);
+});
+
+test('explains gaps that remain even when the common unit divides the amount', () => {
+  const result = calc.calculate({ amount: '10', allowHalf: false, selection: new Set(['coin-20', 'coin-50']) });
+  assert.equal(result.ways, 0n);
+  assert.match(result.noSolutionReason, /共同單位可整除該金額/);
+});
+
 test('representative solutions are exact and optimize their named measures', () => {
   const selected = new Set(['note-100', 'coin-50', 'coin-20', 'coin-10', 'coin-5', 'coin-1']);
   const result = calc.calculate({ amount: '105', allowHalf: false, selection: selected });
