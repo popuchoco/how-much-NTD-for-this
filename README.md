@@ -12,8 +12,8 @@
 - 可使用紙鈔與硬幣、僅紙鈔或僅硬幣，並自訂要納入計算的面額。
 - 顯示精確組合總數、組合明細與代表解；明細預設列出 100 組，最多載入 500 組。
 - 自訂面額、計算模式與 5 角偏好記在 `localStorage`；金額不會儲存或上傳。
-- 新台幣介紹頁以中央銀行照片介紹鈔幣設計與發行日期；流通紀念幣另成一區，且不納入計算器。
-- 不計算特殊鈔券、紀念幣或 NT$50 紙鈔。
+- 新台幣介紹頁以中央銀行照片介紹鈔幣設計與發行日期；紀念幣與紀念鈔券分區介紹，不作為額外計算面額。
+- 紀念幣與 NT$50 紀念性塑膠鈔券不納入計算；建國百年 NT$100 紀念券仍按一般 NT$100 面額處理，計算器不區分設計版別。
 - 單筆輸入上限為 NT$200,000；不符合目前可用面額的金額會顯示原因。
 
 ## 計算方式
@@ -43,7 +43,7 @@ node --test
 
 ## 來源與授權
 
-鈔幣圖案與發行日期整理自[中央銀行新臺幣鈔票資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t02.html)、[流通硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t04.htm)與[建國一百年流通拾圓硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/A2/100th10.htm)。中央銀行照片依其[政府網站資料開放宣告](https://www.cbc.gov.tw/tw/cp-307-36676-DE020-1.html)及[政府資料開放授權條款第 1 版](https://data.gov.tw/license)標示使用；照片素材不屬於本專案的 GFDL 授權範圍，詳細資訊見 `CREDITS.md`。
+鈔幣圖案與發行日期整理自[中央銀行新臺幣鈔票資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t02.html)、[流通硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t04.htm)、[五十週年紀念性塑膠鈔券資料](https://www.cbc.gov.tw/public/data/issue/money/a1/50-4.HTM)、[建國百年壹佰圓券資料](https://www.cbc.gov.tw/public/data/issue/money/a1/100-3.HTM)與[建國一百年流通拾圓硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/A2/100th10.htm)。中央銀行照片依其[政府網站資料開放宣告](https://www.cbc.gov.tw/tw/cp-307-36676-DE020-1.html)及[政府資料開放授權條款第 1 版](https://data.gov.tw/license)標示使用；照片素材不屬於本專案的 GFDL 授權範圍，詳細資訊見 `CREDITS.md`。
 
 本專案以 **GNU Free Documentation License 1.2（GFDL 1.2）** 授權。使用照片時請依其各自授權與來源標示辦理。
 
