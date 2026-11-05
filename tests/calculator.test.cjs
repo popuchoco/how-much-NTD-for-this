@@ -9,10 +9,31 @@ test('parses whole-dollar amounts and grouped thousands', () => {
   assert.equal(calc.parseAmount('1280', false).ticks, 2560);
   assert.equal(calc.parseAmount('1,280', false).ticks, 2560);
   assert.equal(calc.parseAmount('1,280.5', true).ticks, 2561);
+  assert.equal(calc.parseAmount('200,000', false).ok, true);
+  assert.equal(calc.parseAmount('200,001', false).ok, false);
   assert.equal(calc.parseAmount('12.5', false).ok, false);
   assert.equal(calc.parseAmount('1,28', true).ok, false);
   assert.equal(calc.parseAmount('0', false).ok, false);
   assert.equal(calc.parseAmount('200,000.5', true).ok, false);
+});
+
+test('empty denomination selection returns a clear no-solution reason', () => {
+  const result = calc.calculate({ amount: '1', allowHalf: false, selection: new Set() });
+  assert.equal(result.ok, true);
+  assert.equal(result.ways, 0n);
+  assert.match(result.noSolutionReason, /沒有可用面額/);
+  assert.deepEqual(result.solutions, []);
+});
+
+test('exact maximum amount works with a single largest denomination', () => {
+  const selection = new Set(['note-2000']);
+  const result = calc.calculate({ amount: '200,000', allowHalf: false, mode: 'notes', selection });
+  assert.equal(result.ok, true);
+  assert.equal(result.ways, 1n);
+  assert.equal(result.solutions.length, 1);
+  assert.equal(result.solutions[0].counts['note-2000'], 100);
+  assert.equal(result.extremes.fewestPieces['note-2000'], 100);
+  assert.equal(calc.calculate({ amount: '200,001', allowHalf: false, mode: 'notes', selection }).ok, false);
 });
 
 test('counts all unordered combinations for a simple coin set', () => {
