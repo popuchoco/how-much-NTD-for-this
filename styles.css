@@ -299,6 +299,8 @@ h1, h2, h3, p { margin-top: 0; }
 .activity-skill { color: var(--muted); font-size: .75rem; line-height: 1.45; text-align: right; }
 .activity-card h3 { margin: 0 0 7px; font-size: 1rem; line-height: 1.45; font-weight: 650; }
 .activity-card > p { margin: 0 0 8px; color: var(--ink-soft); font-size: .94rem; line-height: 1.7; }
+.extension-intro { max-width: 900px; margin: -3px 0 15px; color: var(--ink-soft); font-size: .94rem; line-height: 1.8; }
+.extension-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .activity-answer { width: 100%; margin-top: auto; border-top: 1px solid var(--line); }
 .activity-answer summary { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--green); font-size: .88rem; font-weight: 650; list-style: none; }
 .activity-answer summary::-webkit-details-marker { display: none; }
@@ -389,6 +391,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   .step-number { margin-bottom: 7px; }
   .about-cta { width: 100%; }
   .activity-grid { grid-template-columns: 1fr; gap: 8px; }
+  .extension-grid { grid-template-columns: 1fr; }
   .activity-card { min-height: 0; padding: 15px 15px 11px; }
   .activity-answer { margin-top: 4px; }
   .curriculum-section { margin-top: 15px; padding: 20px 17px 19px; }

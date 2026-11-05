@@ -18,7 +18,7 @@ This is a small Taiwan cash-desk tool: a clear amount-entry area, a denomination
 
 - **Calculator:** amount entry and filters remain on the left; result summary and combinations remain on the right. On narrow screens, these stack in task order.
 - **About:** banknotes and coins use paired official CBC front/back photographs; design notes and issue dates stay directly beneath each face pair. Commemorative coins remain a separate explanatory section and are not calculator denominations.
-- **Life applications:** six original Grade 2-friendly money scenarios use short prompts and native disclosure answers. The page cites official curriculum and learning-resource PDFs; it does not reproduce worksheets. Activities progress through counting/exchanging, exact payment/change, shopping/estimation, repeated addition, and equal sharing.
+- **Life applications:** six original Grade 2-friendly money scenarios plus Grade 3 estimation and Grade 4 rounding extensions use short prompts and native disclosure answers. The page lists only the corresponding curriculum-area text, not PDF links or reproduced worksheets. Upper-grade estimates are clearly distinguished from exact payment.
 - Original Q-style SVGs remain in the calculator for quick denomination recognition; official photos are confined to the explanatory page.
 
 ## Signature detail

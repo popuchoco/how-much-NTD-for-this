@@ -13,7 +13,7 @@
 - 顯示精確組合總數、組合明細與代表解；明細預設列出 100 組，最多載入 500 組。
 - 自訂面額、計算模式與 5 角偏好記在 `localStorage`；金額不會儲存或上傳。
 - 新台幣介紹頁以中央銀行照片介紹鈔幣設計與發行日期；紀念幣與紀念鈔券分區介紹，不作為額外計算面額。
-- 生活應用頁提供六個原創國小二年級生活數學情境，練習購物、估算、付錢、找零、換錢、重複加法與平均分配，並連結政府課程與教材資源。
+- 生活應用頁提供六個原創國小二年級情境，以及國小三年級估算、四年級數值捨入的進階例子；估算只作判斷參考，結帳仍以精確金額為準。
 - 紀念幣與 NT$50 紀念性塑膠鈔券不納入計算；建國百年 NT$100 紀念券仍按一般 NT$100 面額處理，計算器不區分設計版別。
 - 單筆輸入上限為 NT$200,000；不符合目前可用面額的金額會顯示原因。
 
@@ -47,7 +47,7 @@ node --test
 
 鈔幣圖案與發行日期整理自[中央銀行新臺幣鈔票資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t02.html)、[流通硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t04.htm)、[五十週年紀念性塑膠鈔券資料](https://www.cbc.gov.tw/public/data/issue/money/a1/50-4.HTM)、[建國百年壹佰圓券資料](https://www.cbc.gov.tw/public/data/issue/money/a1/100-3.HTM)與[建國一百年流通拾圓硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/A2/100th10.htm)。中央銀行照片依其[政府網站資料開放宣告](https://www.cbc.gov.tw/tw/cp-307-36676-DE020-1.html)及[政府資料開放授權條款第 1 版](https://data.gov.tw/license)標示使用；照片素材不屬於本專案的 GFDL 授權範圍，詳細資訊見 `CREDITS.md`。
 
-生活應用頁的數學主題參考[認識錢幣教材](https://cirn.k12ea.gov.tw/Upload/webfile/105268/638392957900543758.pdf)、[數學領域課程手冊](https://www.naer.edu.tw/upload/1/16/doc/2069/%E6%95%B8%E5%AD%B8%E9%A0%98%E5%9F%9F%E8%AA%B2%E7%A8%8B%E6%89%8B%E5%86%8A(%E5%AE%9A%E7%A8%BF%E7%89%88).pdf)、[國小二年級教材 2-1-4](https://priori.moe.gov.tw/upload/page/resource/material/math/grade2/2-1-4.pdf)及[國小二年級數學基本教材](https://priori.moe.gov.tw/upload/page/resource/basic/105-2%E5%B9%B4%E7%B4%9A%E6%95%B8%E5%AD%B8.pdf)。頁面例題由本專案自行編寫，非官方教材摘錄或教育機關認可內容。
+生活應用頁參考以下數學領域內容：國民小學二年級數學領域－認識錢幣、國民小學三年級數學領域－估算法、國民小學四年級數學領域－數值捨入法。頁面例題由本專案自行編寫，非官方教材摘錄或教育機關認可內容。
 
 本專案以 **GNU Free Documentation License 1.2（GFDL 1.2）** 授權。使用照片時請依其各自授權與來源標示辦理。
 

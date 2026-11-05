@@ -8,8 +8,8 @@
 
 - `calculator.js`：輸入解析、面額選擇、組合計數、代表解與畫面更新。
 - `index.html`：計算器畫面與語意化表單。
-- `about.html`：新台幣面額與流通紀念幣介紹。
-- `life-applications.html`：以二年級生活數學學習重點設計的原創貨幣應用情境，附官方參考資源。
+- `about.html`：新台幣鈔幣、流通紀念幣與紀念鈔券介紹。
+- `life-applications.html`：以二年級錢幣應用為基礎，延伸三年級估算與四年級取概數的原創情境練習，並列對應課綱領域文字。
 - `styles.css`：三個頁面共用的響應式樣式及互動狀態。
 - `assets/cash-icons.svg`：計算器使用的原創 Q 版面額圖示。
 - `assets/central-bank/`：新台幣介紹頁使用的央行照片；來源及授權見同目錄的 `CREDITS.md`。
