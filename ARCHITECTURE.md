@@ -9,7 +9,8 @@
 - `calculator.js`：輸入解析、面額選擇、組合計數、代表解與畫面更新。
 - `index.html`：計算器畫面與語意化表單。
 - `about.html`：新台幣面額與流通紀念幣介紹。
-- `styles.css`：兩個頁面共用的響應式樣式及互動狀態。
+- `life-applications.html`：以二年級生活數學學習重點設計的原創貨幣應用情境，附官方參考資源。
+- `styles.css`：三個頁面共用的響應式樣式及互動狀態。
 - `assets/cash-icons.svg`：計算器使用的原創 Q 版面額圖示。
 - `assets/central-bank/`：新台幣介紹頁使用的央行照片；來源及授權見同目錄的 `CREDITS.md`。
 
@@ -52,6 +53,7 @@
 - 表單使用可見標籤、`fieldset` / `legend`、`aria-describedby`；輸入錯誤透過 `role="alert"` 呈現。
 - 計算狀態使用專用的 `role="status"` 即時區域，避免把整份明細列表放入 `aria-live` 後逐列朗讀；結果區仍保留 `aria-busy`。
 - `mount` 以表單的 `data-mounted` 標記避免重複掛載、累積事件監聽器。
+- 生活應用頁的範例連結可用 `?amount=<整數>` 預填金額；初始化僅接受 `parseAmount` 驗證通過的值，不會覆寫已儲存的面額或模式偏好。
 - 鍵盤焦點樣式、44px 以上主要控制目標及減少動態效果偏好由 `styles.css` 提供，詳見 [`DESIGN.md`](DESIGN.md)。
 
 ## 審查追蹤

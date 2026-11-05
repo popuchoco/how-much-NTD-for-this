@@ -12,12 +12,13 @@ This is a small Taiwan cash-desk tool: a clear amount-entry area, a denomination
 - **Secondary accent:** banknote red `#a63335` for headings, notes, and alerts; do not use color as the only state cue.
 - **Typography:** platform system sans for all copy; tabular numerals for amounts and dates. No remote font request, so the tool remains self-contained and does not contact a font host.
 - **Surfaces:** moderate 6–12px corners, thin cool borders, restrained shadow on the two primary panels only.
-- **Navigation and footer:** same compact top navigation and license footer on both pages.
+- **Navigation and footer:** same compact top navigation and license footer across the calculator, about, and life-applications pages.
 
 ## Page structure
 
 - **Calculator:** amount entry and filters remain on the left; result summary and combinations remain on the right. On narrow screens, these stack in task order.
 - **About:** banknotes and coins use paired official CBC front/back photographs; design notes and issue dates stay directly beneath each face pair. Commemorative coins remain a separate explanatory section and are not calculator denominations.
+- **Life applications:** six original Grade 2-friendly money scenarios use short prompts and native disclosure answers. The page cites official curriculum and learning-resource PDFs; it does not reproduce worksheets. Activities progress through counting/exchanging, exact payment/change, shopping/estimation, repeated addition, and equal sharing.
 - Original Q-style SVGs remain in the calculator for quick denomination recognition; official photos are confined to the explanatory page.
 
 ## Signature detail
@@ -30,4 +31,5 @@ The about page pairs the two faces of each denomination in a compact, labeled ph
 - Calculation updates use a compact `role="status"` announcement instead of putting the full combination list in a live region.
 - Keyboard focus is explicit and uses a consistent 3px ring.
 - Main interactive controls provide at least a 44px target; responsive layouts reflow without horizontal scrolling.
+- Life-application answers use native `<details>` / `<summary>` controls so they are keyboard-operable and work without JavaScript.
 - Reduced-motion preferences remain respected; content does not depend on animation or color alone.

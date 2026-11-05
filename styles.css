@@ -289,6 +289,35 @@ h1, h2, h3, p { margin-top: 0; }
 .about-cta svg { width: 18px; height: 18px; }
 .about-cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; box-shadow: 0 0 0 3px #ffffff; }
 
+.life-page .about-intro { padding-bottom: 30px; }
+.life-section { padding-bottom: 25px; }
+.activity-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.activity-card { min-width: 0; min-height: 260px; display: flex; flex-direction: column; align-items: flex-start; padding: 16px 16px 13px; background: #f7faf8; border: 1px solid var(--line); border-radius: 8px; }
+.activity-topline { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.activity-icon { width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; overflow: hidden; background: #ffffff; border: 1px solid var(--line); border-radius: 7px; }
+.activity-icon svg { width: 32px; height: 32px; }
+.activity-skill { color: var(--muted); font-size: .75rem; line-height: 1.45; text-align: right; }
+.activity-card h3 { margin: 0 0 7px; font-size: 1rem; line-height: 1.45; font-weight: 650; }
+.activity-card > p { margin: 0 0 8px; color: var(--ink-soft); font-size: .94rem; line-height: 1.7; }
+.activity-answer { width: 100%; margin-top: auto; border-top: 1px solid var(--line); }
+.activity-answer summary { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--green); font-size: .88rem; font-weight: 650; list-style: none; }
+.activity-answer summary::-webkit-details-marker { display: none; }
+.activity-answer summary::after { content: "+"; flex: 0 0 auto; color: var(--red); font-size: 1.15rem; font-weight: 500; }
+.activity-answer[open] summary::after { content: "−"; }
+.activity-answer > p { margin: 0 0 12px; color: var(--ink-soft); font-size: .9rem; line-height: 1.75; }
+.activity-answer strong { color: var(--ink); font-weight: 700; }
+.activity-action { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; margin-top: 5px; color: var(--green); font-size: .84rem; font-weight: 650; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.activity-action:hover { color: var(--red); }
+.life-note { margin-top: 15px; }
+.curriculum-section { margin-top: 20px; }
+.curriculum-section .about-section-heading { margin-bottom: 9px; }
+.curriculum-copy { max-width: 900px; margin: 0 0 12px; color: var(--ink-soft); font-size: .94rem; line-height: 1.8; }
+.curriculum-resources { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 22px; margin: 0; padding-left: 20px; color: var(--green); }
+.curriculum-resources li { padding-left: 3px; }
+.curriculum-resources a { min-height: 44px; display: inline-flex; align-items: center; color: var(--green); font-size: .88rem; line-height: 1.55; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.curriculum-resources a:hover { color: var(--red); }
+.curriculum-section .about-cta { margin-top: 13px; }
+
 .page-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 26px 2px 34px; color: var(--muted); font-size: .75rem; }
 .page-footer span:first-child { font-weight: 500; }
 .page-footer span:first-child span { padding: 0 4px; color: var(--red); }
@@ -298,6 +327,7 @@ h1, h2, h3, p { margin-top: 0; }
 a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; box-shadow: 0 0 0 3px #ffffff; }
 :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; box-shadow: 0 0 0 3px #ffffff; }
 @media (max-width: 900px) {
+  .activity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .calculator-layout { grid-template-columns: minmax(290px, .9fr) minmax(0, 1.1fr); gap: 14px; }
   .input-panel { padding: 24px 21px 20px; }
   .results-panel { padding: 24px 22px; }
@@ -358,11 +388,18 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   .guide-steps li { min-height: 0; padding: 12px 13px; }
   .step-number { margin-bottom: 7px; }
   .about-cta { width: 100%; }
+  .activity-grid { grid-template-columns: 1fr; gap: 8px; }
+  .activity-card { min-height: 0; padding: 15px 15px 11px; }
+  .activity-answer { margin-top: 4px; }
+  .curriculum-section { margin-top: 15px; padding: 20px 17px 19px; }
+  .curriculum-resources { grid-template-columns: 1fr; gap: 0; }
 }
 @media (max-width: 390px) {
   .topbar { padding: 0 16px; }
   .top-nav { gap: 0; }
-  .top-nav-link { padding: 0 8px; font-size: .74rem; }
+  .brand-mark { width: 30px; }
+  .brand-name { font-size: .85rem; }
+  .top-nav-link { padding: 0 5px; font-size: .68rem; }
   .page-shell { width: calc(100% - 24px); }
   .input-panel, .results-panel { padding-right: 16px; padding-left: 16px; }
   .mode-options { gap: 5px; }

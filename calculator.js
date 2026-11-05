@@ -572,6 +572,15 @@
       visibleLimit = LIST_LIMIT;
       calculateNow(true);
     });
+
+    const linkedAmount = new URLSearchParams(doc.defaultView?.location?.search || '').get('amount');
+    if (linkedAmount) {
+      const parsed = parseAmount(linkedAmount, preferences.halfEnabled);
+      if (parsed.ok) {
+        amountInput.value = parsed.half ? `${parsed.whole}.5` : String(parsed.whole);
+        calculateNow(false);
+      }
+    }
   }
 
   return {
