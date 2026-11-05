@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#edf1ee" />
+    <meta name="description" content="輸入目標金額與目前持有的總額或鈔幣張數，計算還需要補多少，以及可行的補足配法。" />
+    <title>我有多少錢，剩下幫我配｜現金怎麼配</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./calculator.js" defer></script>
+    <script src="./make-up.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳至補足金額工具</a>
+    <header class="topbar">
+      <a class="brand" href="./index.html" aria-label="現金怎麼配，前往計算器">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <rect x="4.5" y="7.5" width="19" height="15" rx="2.5" stroke="currentColor" stroke-width="1.8" />
+            <path d="M9 12.25h10M9 17.25h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            <circle cx="23.5" cy="21.5" r="5" fill="#edf1ee" stroke="currentColor" stroke-width="1.8" />
+            <path d="M22 21.5h3M23.5 20v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          </svg>
+        </span>
+        <span class="brand-name">現金怎麼配</span>
+      </a>
+      <nav class="top-nav" aria-label="主要導覽">
+        <a class="top-nav-link" href="./index.html">計算器</a>
+        <a class="top-nav-link is-current" href="./make-up.html" aria-current="page">湊足金額</a>
+        <a class="top-nav-link" href="./about.html">新台幣介紹</a>
+        <a class="top-nav-link" href="./life-applications.html">生活應用</a>
+      </nav>
+    </header>
+
+    <main id="main" class="page-shell makeup-page">
+      <section class="intro about-intro" aria-labelledby="makeup-title">
+        <p class="eyebrow"><span class="eyebrow-line"></span>現金補足計算</p>
+        <h1 id="makeup-title">我有多少錢，<br class="mobile-break" />剩下幫我配。</h1>
+        <p class="intro-copy">設定你的目標，再輸入手上已經有的總額，或逐一填入紙鈔與硬幣張數。計算器會算出還差多少，並列出可以補足的配法。</p>
+      </section>
+
+      <section class="calculator-layout makeup-layout" aria-label="現金補足工具">
+        <aside class="input-panel makeup-input-panel" aria-labelledby="makeup-input-title">
+          <div class="panel-heading">
+            <div><p class="section-kicker">目標與持有金額</p><h2 id="makeup-input-title">設定補足條件</h2></div>
+            <span class="panel-index" aria-hidden="true">NT$</span>
+          </div>
+
+          <form id="makeup-form" novalidate>
+            <label class="amount-label" for="makeup-target">你想湊到多少元？</label>
+            <div class="amount-field">
+              <span class="currency-prefix" aria-hidden="true">NT$</span>
+              <input id="makeup-target" name="target" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="例如 1,280" aria-describedby="makeup-target-help makeup-target-error" />
+              <span class="amount-suffix" aria-hidden="true">元</span>
+            </div>
+            <p class="field-help" id="makeup-target-help">單筆目標上限 NT$200,000；開啟 5 角後可輸入 .5。</p>
+            <p class="field-error" id="makeup-target-error" role="alert" hidden></p>
+
+            <fieldset class="mode-fieldset makeup-method-fieldset">
+              <legend>你知道手上金額的方式</legend>
+              <div class="mode-options makeup-method-options">
+                <label class="mode-option"><input type="radio" name="inventory-method" value="total" checked /><span>我知道總額</span></label>
+                <label class="mode-option"><input type="radio" name="inventory-method" value="denominations" /><span>我知道鈔幣張數</span></label>
+              </div>
+            </fieldset>
+
+            <div id="inventory-total-panel" class="inventory-input-panel">
+              <label class="amount-label" for="makeup-current-total">你目前有多少元？</label>
+              <div class="amount-field amount-field-compact">
+                <span class="currency-prefix" aria-hidden="true">NT$</span>
+                <input id="makeup-current-total" name="current-total" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0" aria-describedby="makeup-current-help makeup-inventory-error" />
+                <span class="amount-suffix" aria-hidden="true">元</span>
+              </div>
+              <p class="field-help" id="makeup-current-help">沒有持有金額可填 0；可輸入千分位。</p>
+            </div>
+
+            <div id="inventory-counts-panel" class="inventory-input-panel" hidden>
+              <p class="amount-label" id="count-input-title">你手上的鈔幣張數</p>
+              <div id="inventory-counts" aria-labelledby="count-input-title" aria-describedby="makeup-inventory-error"></div>
+            </div>
+            <p class="field-error" id="makeup-inventory-error" role="alert" hidden></p>
+
+            <fieldset class="mode-fieldset makeup-output-mode">
+              <legend>剩下的金額用哪些面額補？</legend>
+              <div class="mode-options">
+                <label class="mode-option"><input type="radio" name="makeup-mode" value="all" checked /><span>鈔票＋硬幣</span></label>
+                <label class="mode-option"><input type="radio" name="makeup-mode" value="notes" /><span>僅紙鈔</span></label>
+                <label class="mode-option"><input type="radio" name="makeup-mode" value="coins" /><span>僅硬幣</span></label>
+              </div>
+            </fieldset>
+
+            <div class="half-toggle-row makeup-half-toggle">
+              <svg class="half-coin-icon" aria-hidden="true"><use href="./assets/cash-icons.svg#coin-half"></use></svg>
+              <div class="half-copy"><span class="toggle-title">計算 5 角</span><span class="toggle-description">目標、持有金額與補足配法都納入 NT$0.5</span></div>
+              <label class="switch" aria-label="啟用 5 角計算">
+                <input id="makeup-half-dollar" type="checkbox" />
+                <span class="switch-track" aria-hidden="true"><span></span></span>
+              </label>
+            </div>
+
+            <aside class="makeup-rule-note">
+              <span class="note-mark" aria-hidden="true">i</span>
+              <p>手上張數只用來加總現有金額；列出的配法是另外補上的鈔幣，不會重複扣掉你已持有的張數。</p>
+            </aside>
+
+            <button class="calculate-button" type="submit"><span>幫我配剩下的金額</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M10.5 5.5 15 10l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+          </form>
+          <p class="privacy-note"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2m-8 .5h9v6h-9z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" /></svg>金額與張數只在瀏覽器計算，不會儲存或上傳。</p>
+        </aside>
+
+        <section class="results-panel makeup-results-panel" id="makeup-results-panel" aria-labelledby="makeup-results-title" aria-busy="false">
+          <div class="results-topline">
+            <div><p class="section-kicker">補足結果</p><h2 id="makeup-results-title">還差多少？</h2></div>
+            <span class="result-status" id="makeup-status" role="status" aria-live="polite" aria-atomic="true"><span class="status-dot" aria-hidden="true"></span>等待輸入</span>
+          </div>
+
+          <div class="empty-state makeup-empty-state" id="makeup-empty-state">
+            <div class="empty-illustration" aria-hidden="true">
+              <svg viewBox="0 0 160 118" fill="none">
+                <rect x="25" y="34" width="86" height="52" rx="7" fill="#e2eeea" stroke="#6f918b" stroke-width="1.5" />
+                <path d="M39 48h57M39 59h32M39 70h44" stroke="#7f9785" stroke-width="2" stroke-linecap="round" />
+                <circle cx="115" cy="77" r="21" fill="#e9d8aa" stroke="#a97d35" stroke-width="1.5" />
+                <circle cx="115" cy="77" r="15" fill="#f4e8c7" stroke="#fff9e8" stroke-width="1.5" />
+                <path d="M106 77h18m-9-9v18" stroke="#775d2d" stroke-width="2" stroke-linecap="round" />
+                <path d="M115 25v-9m-5 4 5-5 5 5" stroke="#b6442b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <h3>先設定目標與手上金額</h3>
+            <p>你可以只輸入總額，也可以逐一填寫手上的鈔票張數與硬幣枚數。</p>
+            <div class="example-prompt"><span class="example-mark">例如</span><span>目標 NT$1,000</span><span aria-hidden="true">−</span><span>已有 NT$250</span></div>
+          </div>
+
+          <div class="makeup-result-content" id="makeup-result-content" hidden>
+            <dl class="makeup-summary" aria-label="目標金額摘要">
+              <div><dt>目標金額</dt><dd id="makeup-target-value">NT$0</dd></div>
+              <div><dt>目前持有</dt><dd id="makeup-current-value">NT$0</dd></div>
+              <div class="makeup-remaining"><dt>還需要補</dt><dd id="makeup-remaining-value">NT$0</dd></div>
+            </dl>
+            <div class="makeup-message makeup-complete-message" id="makeup-already-enough" hidden>
+              <span class="complete-mark" aria-hidden="true">✓</span><p id="makeup-surplus-value"></p>
+            </div>
+            <div id="makeup-needs-more" hidden>
+              <div class="makeup-extremes" id="makeup-extremes" aria-label="代表性補足配法" hidden></div>
+              <div class="no-solution makeup-no-solution" id="makeup-no-solution" hidden>
+                <span class="no-solution-icon" aria-hidden="true">!</span>
+                <h3>目前面額無法剛好補足</h3>
+                <p id="makeup-no-solution-message"></p>
+              </div>
+              <section class="makeup-solutions-section" id="makeup-solutions-section" aria-labelledby="makeup-solutions-title" hidden>
+                <div class="list-heading">
+                  <div><h3 id="makeup-solutions-title">補足配法</h3><p>以下都是額外補上的金額</p></div>
+                  <span class="list-count" id="makeup-combination-count"></span>
+                </div>
+                <div class="combination-list" id="makeup-combination-list"></div>
+                <p class="truncation-note" id="makeup-truncation-note" hidden></p>
+                <button class="load-more-button" id="makeup-load-more" type="button" hidden>再顯示 100 組</button>
+              </section>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <footer class="page-footer">
+        <span>現金怎麼配 <span aria-hidden="true">·</span> 新台幣面額拆分工具</span>
+        <span><a class="license-link" href="./LICENSE">GNU FDL 1.2</a><span aria-hidden="true"> · </span>計算在你的瀏覽器中完成</span>
+      </footer>
+    </main>
+  </body>
+</html>
