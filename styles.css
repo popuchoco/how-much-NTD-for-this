@@ -268,6 +268,8 @@ h1, h2, h3, p { margin-top: 0; }
 .page-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 26px 2px 34px; color: var(--muted); font-size: .69rem; letter-spacing: .015em; }
 .page-footer span:first-child { font-weight: 500; }
 .page-footer span:first-child span { padding: 0 4px; color: var(--red); }
+.license-link { color: var(--muted); text-decoration: none; }
+.license-link:hover, .license-link:focus-visible { color: var(--red); text-decoration: underline; text-underline-offset: 3px; }
 
 :focus-visible { outline: 3px solid #9a552a; outline-offset: 3px; }
 @media (max-width: 900px) {

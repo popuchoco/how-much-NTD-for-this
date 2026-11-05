@@ -12,6 +12,7 @@
 - 偏好記在目前瀏覽器，不會上傳；金額不會儲存。
 - 不含紀念幣、特殊鈔券或 NT$50 紙鈔。
 - 單筆金額上限 NT$200,000；組合很多時保留精確總數與代表解，明細一次顯示 100 種、最多可載入 500 種以維持頁面流暢。
+- 本專案依 GNU Free Documentation License 1.2 授權，完整授權條文見 `LICENSE`。
 
 ## 本機預覽
 
@@ -29,6 +30,6 @@ python -m http.server 8000
 node --test
 ```
 
-## GitHub Pages
+## 發布
 
-推送到 `main` 後，`.github/workflows/pages.yml` 會將靜態頁面部署到 GitHub Pages。第一次部署時，需在 GitHub repository 的 **Settings → Pages** 將 Build and deployment 的 Source 設為 **GitHub Actions**。
+原始碼已推送到指定 GitHub repository。此 repository 目前為 private，GitHub Pages 依目前帳戶方案無法啟用；靜態檔可在公開 repository 或支援 Pages 的方案下發布，也可透過 ChatGPT Sites 部署為私人頁面。
