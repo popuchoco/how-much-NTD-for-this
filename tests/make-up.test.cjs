@@ -9,11 +9,61 @@ test('parses held totals including zero, grouped thousands, and optional half do
   assert.equal(makeup.parseInventoryAmount('1,20', true).ok, false);
 });
 
+test('rejects empty, non-numeric, malformed, non-positive, and over-limit targets', () => {
+  const invalidTargets = ['', 'abc', '1.23', '1,28', '-100', '0', '200,001', '9'.repeat(400)];
+  for (const target of invalidTargets) {
+    const result = makeup.calculateTopUp({ target, currentAmount: '0' });
+    assert.equal(result.ok, false, `target should be rejected: ${JSON.stringify(target)}`);
+    assert.equal(result.field, 'target');
+    assert.ok(result.error);
+  }
+
+  const empty = makeup.calculateTopUp({ target: '', currentAmount: '0' });
+  assert.match(empty.error, /請先輸入金額/);
+  const zero = makeup.calculateTopUp({ target: '0', currentAmount: '0' });
+  assert.match(zero.error, /金額需大於 0/);
+  const maximum = makeup.calculateTopUp({ target: '200,000', currentAmount: '200,000' });
+  assert.equal(maximum.ok, true);
+  assert.equal(maximum.status, 'exact');
+});
+
+test('rejects malformed current totals and preserves the current-amount error field', () => {
+  for (const currentAmount of ['', 'abc', '1.23', '1,28', '-100', '1e3']) {
+    const result = makeup.calculateTopUp({ target: '100', currentAmount });
+    assert.equal(result.ok, false, `current total should be rejected: ${JSON.stringify(currentAmount)}`);
+    assert.equal(result.field, 'current-amount');
+    assert.ok(result.error);
+  }
+
+  assert.equal(makeup.calculateTopUp({ target: '100', currentAmount: '1,000' }).status, 'surplus');
+});
+
 test('adds denomination counts by value and rejects disabled half-dollar counts', () => {
   const counts = { 'note-100': '2', 'coin-20': '1', 'coin-1': '3' };
   assert.equal(makeup.sumDenominationCounts(counts, false).ticks, 446n); // NT$223
   assert.equal(makeup.sumDenominationCounts({ ...counts, 'coin-half': '2' }, false).ok, false);
   assert.equal(makeup.sumDenominationCounts({ ...counts, 'coin-half': '2' }, true).ticks, 448n);
+});
+
+test('rejects non-integer and overlong denomination counts with the offending field', () => {
+  for (const count of ['abc', '-1', '1.5', '1,000', '9'.repeat(13)]) {
+    const result = makeup.sumDenominationCounts({ 'note-100': count }, false);
+    assert.equal(result.ok, false, `count should be rejected: ${JSON.stringify(count)}`);
+    assert.equal(result.field, 'note-100');
+    assert.match(result.error, /數量請輸入/);
+  }
+
+  const maximum = makeup.sumDenominationCounts({ 'note-100': '999999999999' }, false);
+  assert.equal(maximum.ok, true);
+  assert.equal(maximum.ticks, 199999999999800n);
+});
+
+test('treats an empty denomination count as zero and identifies disabled half-dollar counts', () => {
+  assert.equal(makeup.sumDenominationCounts({ 'note-100': '' }, false).ticks, 0n);
+  const half = makeup.sumDenominationCounts({ 'coin-half': '1' }, false);
+  assert.equal(half.ok, false);
+  assert.equal(half.field, 'coin-half');
+  assert.match(half.error, /請開啟「計算 5 角」/);
 });
 
 test('calculates the remaining amount from a known current total', () => {
