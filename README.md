@@ -8,12 +8,12 @@
 - 硬幣：NT$50、20、10、5、1；可選擇啟用 NT$0.5（5 角）。
 - 顯示精確組合數與組合明細；代表解包括總件數最少、硬幣枚數最多、紙鈔張數最少。
 - 可切換紙鈔＋硬幣、僅紙鈔、僅硬幣，並自訂可用面額。
-- 提供「新台幣介紹」畫面與原創 Q 版紙鈔／硬幣 SVG 圖示；插畫僅為面額示意，不模仿真鈔或真幣外觀。
-- 介紹頁列出一般流通面額的圖案主題、發行日期，另設「流通紀念幣」區；紀念幣只作介紹，不進入計算。
+- 提供「新台幣介紹」畫面：一般面額展示中央銀行公布的鈔幣正反面照片，並列出設計主題與發行日期；計算器仍以原創 Q 版 SVG 圖示辨認面額。
+- 另設「流通紀念幣」區；紀念幣只作介紹，不進入計算。
 - 偏好記在目前瀏覽器，不會上傳；金額不會儲存。
 - 不含紀念幣、特殊鈔券或 NT$50 紙鈔。
 - 單筆金額上限 NT$200,000；組合很多時保留精確總數與代表解，明細一次顯示 100 種、最多可載入 500 種以維持頁面流暢。
-- 本專案依 GNU Free Documentation License 1.2 授權，完整授權條文見 `LICENSE`。
+- 本專案文字與原創內容依 GNU Free Documentation License 1.2 授權，完整條文見 `LICENSE`。中央銀行照片素材採獨立的政府資料開放授權條款第 1 版，來源與授權說明見 `assets/central-bank/CREDITS.md`。
 
 ## 本機預覽
 
@@ -31,7 +31,7 @@ python -m http.server 8000
 node --test
 ```
 
-紙鈔及硬幣的圖案與發行日期整理自[中央銀行新臺幣鈔票資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t02.html)與[流通硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t04.htm)。
+紙鈔及硬幣的圖案與發行日期整理自[中央銀行新臺幣鈔票資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t02.html)、[流通硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/a1/t04.htm)與[中華民國建國一百年流通拾圓硬幣資料](https://www.cbc.gov.tw/public/data/issue/money/A2/100th10.htm)。中央銀行照片依其[政府網站資料開放宣告](https://www.cbc.gov.tw/tw/cp-307-36676-DE020-1.html)與[政府資料開放授權條款第 1 版](https://data.gov.tw/license)標示使用；照片不裁切、不重繪，詳細來源見 `assets/central-bank/CREDITS.md`。
 
 ## 發布
 

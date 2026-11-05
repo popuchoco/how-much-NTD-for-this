@@ -324,7 +324,7 @@
     }
 
     function describeCounts(counts, denoms) {
-      return denoms.filter((denom) => counts[denom.id] > 0).map((denom) => `${denom.label} × ${counts[denom.id]} ${denom.type}`).join('　·　') || '無需找零';
+      return denoms.filter((denom) => counts[denom.id] > 0).map((denom) => `${denom.label} × ${counts[denom.id]} ${denom.type}`).join('、') || '無需找零';
     }
 
     function makeBreakdown(counts, denoms) {
@@ -429,7 +429,7 @@
         pieces.textContent = `${solution.summary.pieces} 件`;
         const split = doc.createElement('span');
         split.className = 'piece-split';
-        split.textContent = `${solution.summary.notes} 張紙鈔 · ${solution.summary.coins} 枚硬幣`;
+        split.textContent = `${solution.summary.notes} 張紙鈔，${solution.summary.coins} 枚硬幣`;
         summary.append(pieces, split);
         const breakdown = doc.createElement('div');
         breakdown.className = 'row-breakdown';
