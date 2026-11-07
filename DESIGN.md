@@ -16,7 +16,7 @@ This is a small Taiwan cash-desk tool: a clear amount-entry area, a denomination
 
 ## Page structure
 
-- **Calculator:** amount entry and filters remain on the left; result summary and combinations remain on the right. On narrow screens, these stack in task order.
+- **Calculator:** amount entry and filters remain on the left; result summary and combinations remain on the right. On narrow screens, these stack in task order. A compact, labeled payment-scenario group keeps exact tender as the default and offers a consumer option capped at NT$20 change; the result list explicitly shows payment/change and sorts least change first.
 - **About:** banknotes and coins use paired official CBC front/back photographs; design notes and issue dates stay directly beneath each face pair. Commemorative coins remain a separate explanatory section and are not calculator denominations.
 - **Life applications:** six original Grade 2-friendly money scenarios plus Grade 3 estimation and Grade 4 rounding extensions use short prompts and native disclosure answers. The page lists only the corresponding curriculum-area text, not PDF links or reproduced worksheets. Upper-grade estimates are clearly distinguished from exact payment.
 - **Make-up amount:** a two-column task/result view accepts either a known held total or per-denomination counts, then shows the remainder and available top-up combinations. It reuses the calculator's established results language and colors.
@@ -29,6 +29,7 @@ The about page pairs the two faces of each denomination in a compact, labeled ph
 ## Accessibility baseline
 
 - Visible labels and helper/error text remain attached to controls.
+- Payment scenario choices use native grouped radio controls with visible descriptions; payment and change amounts are both printed in consumer mode rather than communicated by color or order alone.
 - Calculation updates use a compact `role="status"` announcement instead of putting the full combination list in a live region.
 - Keyboard focus is explicit and uses a consistent 3px ring.
 - Main interactive controls provide at least a 44px target; responsive layouts reflow without horizontal scrolling.

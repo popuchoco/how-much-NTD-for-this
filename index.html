@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#edf1ee" />
-    <meta name="description" content="輸入新台幣金額，列出紙鈔與硬幣的所有精確拆分組合。" />
+    <meta name="description" content="輸入新台幣金額，查看精確拆分，或在消費者情境中多付並找回最多 NT$20。" />
     <title>新台幣拆鈔計算器｜現金怎麼配</title>
     <link rel="stylesheet" href="./styles.css" />
     <script src="./calculator.js" defer></script>
@@ -35,7 +35,7 @@
       <section class="intro" id="top" aria-labelledby="page-title">
         <p class="eyebrow"><span class="eyebrow-line"></span>新台幣拆鈔計算器</p>
         <h1 id="page-title">一筆金額，<br class="mobile-break" />有幾種配法？</h1>
-        <p class="intro-copy">輸入金額，查看紙鈔與硬幣的精確組合。只算一般流通面額，不含紀念幣或特殊鈔券。</p>
+        <p class="intro-copy">輸入金額，查看紙鈔與硬幣的配法；可選擇付剛好，或使用消費者情境允許找零最多 NT$20。只算一般流通面額，不含紀念幣或特殊鈔券。</p>
       </section>
 
       <section class="calculator-layout" aria-label="現金拆分工具">
@@ -57,6 +57,22 @@
             </div>
             <p class="field-help" id="amount-help">支援整數；啟用輔角後也可輸入 .5。</p>
             <p class="field-error" id="amount-error" role="alert" hidden></p>
+
+            <fieldset class="mode-fieldset payment-scenario-fieldset">
+              <legend>付款情境</legend>
+              <div class="mode-options payment-scenario-options">
+                <label class="mode-option payment-scenario-option">
+                  <input type="radio" name="payment-scenario" value="exact" checked />
+                  <span>付剛好</span>
+                  <small>只列精確金額</small>
+                </label>
+                <label class="mode-option payment-scenario-option">
+                  <input type="radio" name="payment-scenario" value="consumer" />
+                  <span>消費者付款</span>
+                  <small>可找回最多 NT$20</small>
+                </label>
+              </div>
+            </fieldset>
 
             <fieldset class="mode-fieldset">
               <legend>使用方式</legend>
@@ -144,9 +160,10 @@
 
           <div class="result-content" id="result-content" hidden>
             <div class="amount-result">
-              <span class="result-label">拆分金額</span>
+              <span class="result-label" id="result-label">拆分金額</span>
               <strong id="result-amount">NT$0</strong>
               <span class="combination-count" id="combination-count">0 種組合</span>
+              <p class="result-mode-note" id="result-mode-note" hidden></p>
             </div>
 
             <div class="extremes" id="extremes" aria-label="代表性解法"></div>
@@ -162,7 +179,7 @@
 
           <div class="no-solution" id="no-solution" hidden>
             <span class="no-solution-icon" aria-hidden="true">!</span>
-            <h3>目前的面額無法剛好湊出</h3>
+            <h3 id="no-solution-title">目前的面額無法剛好湊出</h3>
             <p id="no-solution-message">請試著開啟更小的面額，或切換紙鈔與硬幣的使用方式。</p>
           </div>
         </section>

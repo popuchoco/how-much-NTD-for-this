@@ -45,6 +45,64 @@ test('counts all unordered combinations for a simple coin set', () => {
   for (const solution of result.solutions) assert.equal(sumTicks(solution.counts, denoms), 12);
 });
 
+test('consumer payment mode allows change up to NT$20 and prioritizes less change', () => {
+  const selection = new Set(['coin-20', 'coin-5']);
+  const exact = calc.calculate({ amount: '6', allowHalf: false, selection });
+  assert.equal(exact.ways, 0n);
+
+  const consumer = calc.calculate({ amount: '6', allowHalf: false, selection, allowChange: true });
+  assert.equal(consumer.ways, 6n);
+  assert.equal(consumer.bestPaymentTicks, 20); // NT$10, NT$4 change
+  assert.equal(consumer.solutions[0].paymentTicks, 20);
+  assert.equal(consumer.solutions[0].changeTicks, 8);
+  assert.deepEqual(consumer.solutions.map((solution) => solution.paymentTicks), [20, 30, 40, 40, 50, 50]);
+  assert.ok(consumer.solutions.every((solution) => solution.changeTicks <= calc.MAX_CHANGE_TWD * 2));
+  assert.equal(sumTicks(consumer.extremes.fewestPieces, consumer.denoms), consumer.bestPaymentTicks);
+});
+
+test('consumer payment mode uses NT$20 coins instead of requiring $1, $5, or $10 coins', () => {
+  const result = calc.calculate({
+    amount: '153',
+    allowHalf: false,
+    selection: new Set(['coin-20']),
+    allowChange: true,
+  });
+  assert.equal(result.ways, 1n);
+  assert.equal(result.bestPaymentTicks, 320); // NT$160
+  assert.equal(result.solutions[0].changeTicks, 14); // NT$7
+  assert.equal(result.solutions[0].counts['coin-20'], 8);
+});
+
+test('consumer payment mode caps change at NT$20 and respects selected use mode', () => {
+  const tooMuchChange = calc.calculate({ amount: '25', allowHalf: false, selection: new Set(['coin-50']), allowChange: true });
+  assert.equal(tooMuchChange.ways, 0n); // NT$50 would require NT$25 change.
+  assert.match(tooMuchChange.noSolutionReason, /最多找零 NT\$20/);
+
+  const notesOnly = calc.calculate({
+    amount: '95',
+    allowHalf: false,
+    mode: 'notes',
+    selection: new Set(['note-100', 'coin-20']),
+    allowChange: true,
+  });
+  assert.equal(notesOnly.ways, 1n);
+  assert.equal(notesOnly.solutions[0].paymentTicks, 200);
+  assert.equal(notesOnly.solutions[0].changeTicks, 10);
+});
+
+test('consumer payment mode supports fractional goals without spending disabled half dollars', () => {
+  const result = calc.calculate({
+    amount: '15.5',
+    allowHalf: true,
+    selection: new Set(['coin-20']),
+    allowChange: true,
+  });
+  assert.equal(result.ways, 1n);
+  assert.equal(result.solutions[0].paymentTicks, 40);
+  assert.equal(result.solutions[0].changeTicks, 9); // NT$4.5 change.
+  assert.equal(result.denoms.some((denom) => denom.id === 'coin-half'), false);
+});
+
 test('supports half-dollar calculations only when enabled', () => {
   const result = calc.calculate({
     amount: '1.5',
@@ -103,6 +161,16 @@ test('representative solutions are exact and optimize their named measures', () 
   assert.equal(mostCoins['note-100'], 0);
   const fewestNotes = extremes.fewestNotes;
   assert.equal(fewestNotes['note-100'], 0); // coins can make the whole amount
+});
+
+test('reconstructs all representative solutions when only one cash type is available', () => {
+  const coins = calc.calculate({ amount: '6', allowHalf: false, mode: 'coins', selection: new Set(['coin-5', 'coin-1']) });
+  for (const counts of Object.values(coins.extremes)) assert.equal(sumTicks(counts, coins.denoms), 12);
+  assert.ok(coins.extremes.fewestNotes);
+
+  const notes = calc.calculate({ amount: '300', allowHalf: false, mode: 'notes', selection: new Set(['note-200', 'note-100']) });
+  for (const counts of Object.values(notes.extremes)) assert.equal(sumTicks(counts, notes.denoms), 600);
+  assert.ok(notes.extremes.mostCoins);
 });
 
 test('large combination spaces keep an exact count and bound rendered rows', () => {

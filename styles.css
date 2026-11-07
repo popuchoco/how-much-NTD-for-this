@@ -119,6 +119,12 @@ h1, h2, h3, p { margin-top: 0; }
 .mode-option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .mode-option:has(input:checked) { color: var(--green); background: var(--green-soft); border-color: #6f918b; font-weight: 700; }
 .mode-option:has(input:focus-visible) { outline: 3px solid var(--ink); outline-offset: 3px; box-shadow: 0 0 0 3px #ffffff; }
+.payment-scenario-fieldset { margin-top: 20px; }
+.payment-scenario-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.payment-scenario-option { gap: 4px; align-content: center; min-height: 58px; padding: 8px 7px; }
+.payment-scenario-option span { font-size: .77rem; }
+.payment-scenario-option small { color: var(--muted); font-size: .67rem; font-weight: 400; line-height: 1.25; }
+.payment-scenario-option:has(input:checked) small { color: var(--green); }
 
 .half-toggle-row { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .half-coin-icon { width: 40px; height: 40px; flex: 0 0 40px; }
@@ -187,6 +193,7 @@ h1, h2, h3, p { margin-top: 0; }
 .result-label { color: var(--muted); font-size: .76rem; }
 .amount-result strong { grid-column: 1; color: var(--ink); font-size: clamp(1.8rem, 4.2vw, 2.45rem); font-weight: 500; letter-spacing: -.07em; line-height: 1.15; font-variant-numeric: tabular-nums; }
 .combination-count { grid-column: 2; grid-row: 1 / span 2; align-self: center; padding: 8px 10px; color: #7f2c2e; background: var(--red-soft); border: 1px solid #e6cfcb; border-radius: 5px; font-size: .74rem; font-weight: 600; white-space: nowrap; }
+.result-mode-note { grid-column: 1 / -1; margin: 2px 0 0; color: var(--muted); font-size: .73rem; line-height: 1.5; }
 
 .extremes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 16px 0 22px; border-bottom: 1px solid var(--line); }
 .extreme-card { min-width: 0; padding: 12px 11px 11px; background: #f7faf8; border: 1px solid var(--line); border-radius: 7px; }
@@ -196,6 +203,7 @@ h1, h2, h3, p { margin-top: 0; }
 .extreme-total { margin: 7px 0 4px; color: var(--ink); font-variant-numeric: tabular-nums; font-size: 1.25rem; letter-spacing: -.06em; }
 .extreme-total small { margin-left: 3px; color: var(--muted); font-family: var(--body-font); font-size: .67rem; letter-spacing: 0; }
 .extreme-detail { margin: 0; color: var(--muted); font-size: .72rem; line-height: 1.5; overflow-wrap: anywhere; }
+.extreme-payment { margin: 6px 0 0; color: var(--green); font-size: .7rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.4; }
 
 .list-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 19px 0 11px; }
 .list-heading h3 { margin: 0 0 4px; font-size: .91rem; font-weight: 600; }
@@ -216,6 +224,9 @@ h1, h2, h3, p { margin-top: 0; }
 .denom-token .money-icon { width: 20px; height: 12px; flex: 0 0 20px; }
 .denom-token .money-icon.coin-icon { width: 16px; height: 16px; flex-basis: 16px; }
 .row-value { align-self: center; color: var(--ink-soft); font-variant-numeric: tabular-nums; font-size: .75rem; white-space: nowrap; }
+.row-value-change { display: grid; gap: 3px; white-space: normal; text-align: right; line-height: 1.3; }
+.row-value-change strong { color: var(--ink); font-size: .74rem; font-weight: 650; }
+.row-value-change span { color: var(--muted); font-size: .7rem; }
 .truncation-note { margin: 11px 0 0; padding: 10px 12px; color: var(--ink-soft); background: var(--gold-soft); border: 1px solid #d5d9c8; border-radius: 6px; font-size: .75rem; line-height: 1.55; }
 .load-more-button { width: 100%; min-height: 44px; margin-top: 9px; color: var(--green); background: #f7faf8; border: 1px solid #9db3ad; border-radius: 6px; font-size: .76rem; font-weight: 600; transition: background .18s ease, border-color .18s ease; }
 .load-more-button:hover { background: var(--green-soft); border-color: #6f918b; }
@@ -418,8 +429,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px soli
   .extremes { grid-template-columns: 1fr; gap: 7px; padding: 13px 0 18px; }
   .extreme-card { grid-template-columns: minmax(110px, .75fr) minmax(73px, .55fr) minmax(0, 1.4fr); padding: 10px; }
   .extreme-detail { font-size: .72rem; }
+  .extreme-payment { grid-column: 1 / -1; margin-top: 0; }
   .combination-row { grid-template-columns: 27px minmax(0, 1fr); gap: 7px; padding: 10px 9px; }
   .row-value { grid-column: 2; grid-row: 2; justify-self: start; margin-top: 5px; font-size: .72rem; }
+  .row-value-change { text-align: left; }
   .row-summary { margin-bottom: 5px; }
   .page-footer { align-items: flex-start; flex-direction: column; gap: 6px; padding: 22px 2px 29px; }
   .about-intro { padding-bottom: 20px; }

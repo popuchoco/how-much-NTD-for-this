@@ -14,6 +14,8 @@
 
   const SETTINGS_KEY = 'cash-how-to-split.preferences.v1';
   const MAX_AMOUNT_TWD = 200000;
+  const MAX_CHANGE_TWD = 20;
+  const MAX_CHANGE_TICKS = MAX_CHANGE_TWD * 2;
   const LIST_LIMIT = 100;
   const MAX_LIST_LIMIT = 500;
   const DP_INFINITY = 0x3fffffff;
@@ -76,32 +78,41 @@
     return preferences;
   }
 
-  function countCombinations(targetTicks, denoms) {
-    if (targetTicks < 0 || !denoms.length) return 0n;
+  function createCombinationTable(maxTicks, denoms) {
+    if (!denoms.length || maxTicks < 0) return { count: () => 0n };
     const common = denoms.reduce((value, denom) => gcd(value, denom.ticks), 0);
-    if (targetTicks % common !== 0) return 0n;
-    const target = targetTicks / common;
+    const maxTarget = Math.floor(maxTicks / common);
     const values = denoms.map((denom) => denom.ticks / common).sort((a, b) => a - b);
-    const ways = new Array(target + 1).fill(0n);
+    const ways = new Array(maxTarget + 1).fill(0n);
     ways[0] = 1n;
     for (const value of values) {
-      for (let amount = value; amount <= target; amount += 1) ways[amount] += ways[amount - value];
+      for (let amount = value; amount <= maxTarget; amount += 1) ways[amount] += ways[amount - value];
     }
-    return ways[target];
+    return {
+      count(targetTicks) {
+        if (targetTicks < 0 || targetTicks % common !== 0) return 0n;
+        const target = targetTicks / common;
+        return target <= maxTarget ? ways[target] : 0n;
+      },
+    };
   }
 
-  function buildExtremes(targetTicks, denoms) {
-    if (!denoms.length) return null;
+  function countCombinations(targetTicks, denoms) {
+    if (targetTicks < 0 || !denoms.length) return 0n;
+    return createCombinationTable(targetTicks, denoms).count(targetTicks);
+  }
+
+  function createExtremeSolver(maxTicks, denoms) {
+    if (!denoms.length || maxTicks < 0) return () => null;
     const common = denoms.reduce((value, denom) => gcd(value, denom.ticks), 0);
-    if (targetTicks % common !== 0) return null;
-    const target = targetTicks / common;
+    const maxTarget = Math.floor(maxTicks / common);
     const values = denoms.map((denom) => ({ ...denom, scaled: denom.ticks / common }));
-    const fewestPieces = new Int32Array(target + 1);
-    const fewestNotes = new Int32Array(target + 1);
-    const mostCoins = new Int32Array(target + 1);
-    const prevFewestPieces = new Int32Array(target + 1);
-    const prevFewestNotes = new Int32Array(target + 1);
-    const prevMostCoins = new Int32Array(target + 1);
+    const fewestPieces = new Int32Array(maxTarget + 1);
+    const fewestNotes = new Int32Array(maxTarget + 1);
+    const mostCoins = new Int32Array(maxTarget + 1);
+    const prevFewestPieces = new Int32Array(maxTarget + 1);
+    const prevFewestNotes = new Int32Array(maxTarget + 1);
+    const prevMostCoins = new Int32Array(maxTarget + 1);
     fewestPieces.fill(DP_INFINITY);
     fewestNotes.fill(DP_INFINITY);
     mostCoins.fill(-1);
@@ -110,27 +121,29 @@
     mostCoins[0] = 0;
 
     for (const denom of values) {
-      for (let amount = denom.scaled; amount <= target; amount += 1) {
+      for (let amount = denom.scaled; amount <= maxTarget; amount += 1) {
         const prior = amount - denom.scaled;
         if (fewestPieces[prior] !== DP_INFINITY && fewestPieces[prior] + 1 < fewestPieces[amount]) {
           fewestPieces[amount] = fewestPieces[prior] + 1;
           prevFewestPieces[amount] = denom.scaled;
         }
         const noteCost = denom.kind === 'note' ? 1 : 0;
-        if (fewestNotes[prior] !== DP_INFINITY && fewestNotes[prior] + noteCost < fewestNotes[amount]) {
-          fewestNotes[amount] = fewestNotes[prior] + noteCost;
+        const notesCandidate = fewestNotes[prior] + noteCost;
+        if (fewestNotes[prior] !== DP_INFINITY && (notesCandidate < fewestNotes[amount] || (notesCandidate === fewestNotes[amount] && !prevFewestNotes[amount]))) {
+          fewestNotes[amount] = notesCandidate;
           prevFewestNotes[amount] = denom.scaled;
         }
         const coinCost = denom.kind === 'coin' ? 1 : 0;
-        if (mostCoins[prior] >= 0 && mostCoins[prior] + coinCost > mostCoins[amount]) {
-          mostCoins[amount] = mostCoins[prior] + coinCost;
+        const coinsCandidate = mostCoins[prior] + coinCost;
+        if (mostCoins[prior] >= 0 && (coinsCandidate > mostCoins[amount] || (coinsCandidate === mostCoins[amount] && !prevMostCoins[amount]))) {
+          mostCoins[amount] = coinsCandidate;
           prevMostCoins[amount] = denom.scaled;
         }
       }
     }
 
     const byScaledValue = new Map(values.map((denom) => [denom.scaled, denom.id]));
-    function reconstruct(predecessors, reachable) {
+    function reconstruct(predecessors, target, reachable) {
       if (!reachable) return null;
       const counts = Object.fromEntries(denoms.map((denom) => [denom.id, 0]));
       let remaining = target;
@@ -143,12 +156,20 @@
       return counts;
     }
 
-    if (fewestPieces[target] === DP_INFINITY) return null;
-    return {
-      fewestPieces: reconstruct(prevFewestPieces, true),
-      fewestNotes: reconstruct(prevFewestNotes, fewestNotes[target] !== DP_INFINITY),
-      mostCoins: reconstruct(prevMostCoins, mostCoins[target] >= 0),
+    return function solve(targetTicks) {
+      if (targetTicks < 0 || targetTicks % common !== 0) return null;
+      const target = targetTicks / common;
+      if (target > maxTarget || fewestPieces[target] === DP_INFINITY) return null;
+      return {
+        fewestPieces: reconstruct(prevFewestPieces, target, true),
+        fewestNotes: reconstruct(prevFewestNotes, target, fewestNotes[target] !== DP_INFINITY),
+        mostCoins: reconstruct(prevMostCoins, target, mostCoins[target] >= 0),
+      };
     };
+  }
+
+  function buildExtremes(targetTicks, denoms) {
+    return createExtremeSolver(targetTicks, denoms)(targetTicks);
   }
 
   function countSummary(counts, denoms) {
@@ -201,10 +222,16 @@
     return result.map((solution) => ({ counts: solution, summary: countSummary(solution, denoms) }));
   }
 
-  function calculate({ amount, allowHalf, mode = 'all', selection = DEFAULT_SELECTED, listLimit = LIST_LIMIT }) {
-    const parsed = parseAmount(amount, allowHalf);
-    if (!parsed.ok) return { ok: false, error: parsed.reason };
-    const denoms = denominationChoices(selection, mode, allowHalf);
+  function rankSolutions(solutions) {
+    return [...solutions].sort((a, b) => {
+      if (a.summary.pieces !== b.summary.pieces) return a.summary.pieces - b.summary.pieces;
+      if (a.summary.notes !== b.summary.notes) return a.summary.notes - b.summary.notes;
+      if (a.summary.coins !== b.summary.coins) return b.summary.coins - a.summary.coins;
+      return 0;
+    });
+  }
+
+  function calculateExactly(parsed, denoms, listLimit, allowChange = false) {
     if (!denoms.length) {
       return {
         ok: true,
@@ -214,6 +241,7 @@
         solutions: [],
         extremes: null,
         truncated: false,
+        allowChange,
         noSolutionReason: '目前沒有可用面額，請選擇至少一種紙鈔或硬幣。',
       };
     }
@@ -228,6 +256,7 @@
         solutions: [],
         extremes: null,
         truncated: false,
+        allowChange,
         noSolutionReason: `目前面額的共同單位為 NT$${commonUnit}，無法整除這筆金額；請啟用更小面額或 5 角。`,
       };
     }
@@ -241,18 +270,78 @@
         solutions: [],
         extremes: null,
         truncated: false,
+        allowChange,
         noSolutionReason: '這些面額的共同單位可整除該金額，但仍無法以目前面額組成；請加入較小面額。',
       };
     }
     const extremes = buildExtremes(parsed.ticks, denoms);
     const solutions = createSolutions(parsed.ticks, denoms, ways, listLimit);
-    const ranked = [...solutions].sort((a, b) => {
-      if (a.summary.pieces !== b.summary.pieces) return a.summary.pieces - b.summary.pieces;
-      if (a.summary.notes !== b.summary.notes) return a.summary.notes - b.summary.notes;
-      if (a.summary.coins !== b.summary.coins) return b.summary.coins - a.summary.coins;
-      return 0;
-    });
-    return { ok: true, parsed, denoms, ways, solutions: ranked, extremes, truncated: ways > BigInt(listLimit) };
+    return { ok: true, parsed, denoms, ways, solutions: rankSolutions(solutions), extremes, truncated: ways > BigInt(listLimit), allowChange };
+  }
+
+  function calculateAllowingChange(parsed, denoms, listLimit) {
+    const maximumPaymentTicks = parsed.ticks + MAX_CHANGE_TICKS;
+    const countsAt = createCombinationTable(maximumPaymentTicks, denoms);
+    const extremesAt = createExtremeSolver(maximumPaymentTicks, denoms);
+    const payableTotals = [];
+    let ways = 0n;
+
+    for (let changeTicks = 0; changeTicks <= MAX_CHANGE_TICKS; changeTicks += 1) {
+      const paymentTicks = parsed.ticks + changeTicks;
+      const count = countsAt.count(paymentTicks);
+      if (count === 0n) continue;
+      const extremes = extremesAt(paymentTicks);
+      if (!extremes) continue;
+      payableTotals.push({ paymentTicks, changeTicks, ways: count, extremes });
+      ways += count;
+    }
+
+    if (!payableTotals.length) {
+      return {
+        ok: true,
+        parsed,
+        denoms,
+        ways: 0n,
+        solutions: [],
+        extremes: null,
+        truncated: false,
+        allowChange: true,
+        maxChangeTicks: MAX_CHANGE_TICKS,
+        noSolutionReason: `目前選取的面額，在最多找零 NT$${MAX_CHANGE_TWD} 的範圍內仍無法組成付款金額；可重新選擇面額或切換使用方式。`,
+      };
+    }
+
+    const solutions = [];
+    for (const payable of payableTotals) {
+      if (solutions.length >= listLimit) break;
+      const rows = rankSolutions(createSolutions(payable.paymentTicks, denoms, payable.ways, listLimit));
+      for (const solution of rows) {
+        if (solutions.length >= listLimit) break;
+        solutions.push({ ...solution, paymentTicks: payable.paymentTicks, changeTicks: payable.changeTicks });
+      }
+    }
+
+    return {
+      ok: true,
+      parsed,
+      denoms,
+      ways,
+      solutions,
+      extremes: payableTotals[0].extremes,
+      truncated: ways > BigInt(solutions.length),
+      allowChange: true,
+      maxChangeTicks: MAX_CHANGE_TICKS,
+      bestPaymentTicks: payableTotals[0].paymentTicks,
+    };
+  }
+
+  function calculate({ amount, allowHalf, mode = 'all', selection = DEFAULT_SELECTED, listLimit = LIST_LIMIT, allowChange = false }) {
+    const parsed = parseAmount(amount, allowHalf);
+    if (!parsed.ok) return { ok: false, error: parsed.reason };
+    const denoms = denominationChoices(selection, mode, allowHalf);
+    return allowChange
+      ? calculateAllowingChange(parsed, denoms, listLimit)
+      : calculateExactly(parsed, denoms, listLimit);
   }
 
   function mount(doc) {
@@ -273,7 +362,7 @@
     function readPreferences() {
       try {
         const raw = localStorage.getItem(SETTINGS_KEY);
-        if (!raw) return { selected: new Set(DEFAULT_SELECTED), halfEnabled: false, mode: 'all' };
+        if (!raw) return { selected: new Set(DEFAULT_SELECTED), halfEnabled: false, mode: 'all', allowChange: false };
         const stored = JSON.parse(raw);
         const valid = Array.isArray(stored.selected) ? stored.selected.filter((id) => DENOMINATIONS.some((denom) => denom.id === id)) : DEFAULT_SELECTED;
         const selected = new Set(valid);
@@ -282,9 +371,10 @@
           selected,
           halfEnabled: Boolean(stored.halfEnabled),
           mode: ['all', 'notes', 'coins'].includes(stored.mode) ? stored.mode : 'all',
+          allowChange: Boolean(stored.allowChange),
         });
       } catch {
-        return { selected: new Set(DEFAULT_SELECTED), halfEnabled: false, mode: 'all' };
+        return { selected: new Set(DEFAULT_SELECTED), halfEnabled: false, mode: 'all', allowChange: false };
       }
     }
 
@@ -294,6 +384,7 @@
           selected: [...preferences.selected],
           halfEnabled: preferences.halfEnabled,
           mode: preferences.mode,
+          allowChange: preferences.allowChange,
         }));
       } catch { /* Storage can be unavailable in private browsing; calculation remains usable. */ }
     }
@@ -342,6 +433,7 @@
         mode: preferences.mode,
         selection: preferences.selected,
         listLimit: visibleLimit,
+        allowChange: preferences.allowChange,
       };
     }
 
@@ -386,7 +478,7 @@
       return fragment;
     }
 
-    function renderExtreme(container, label, mark, counts, denoms, measure, unit, primary = false) {
+    function renderExtreme(container, label, mark, counts, denoms, measure, unit, primary = false, paymentInfo = '') {
       const summary = countSummary(counts, denoms);
       const card = doc.createElement('article');
       card.className = `extreme-card${primary ? ' primary' : ''}`;
@@ -405,6 +497,12 @@
       detail.className = 'extreme-detail';
       detail.textContent = describeCounts(counts, denoms);
       card.append(title, total, detail);
+      if (paymentInfo) {
+        const payment = doc.createElement('p');
+        payment.className = 'extreme-payment';
+        payment.textContent = paymentInfo;
+        card.append(payment);
+      }
       container.append(card);
     }
 
@@ -429,9 +527,12 @@
         empty.hidden = true;
         content.hidden = true;
         noSolution.hidden = false;
+        doc.getElementById('no-solution-title').textContent = result.allowChange
+          ? '找零上限內沒有可用付款組合'
+          : '目前的面額無法剛好湊出';
         doc.getElementById('no-solution-message').textContent = result.noSolutionReason || '請試著開啟更小的面額，或切換紙鈔與硬幣的使用方式。';
         status.classList.remove('is-ready');
-        status.lastChild.textContent = '無法精確湊出';
+        status.lastChild.textContent = result.allowChange ? '找零上限內無解' : '無法精確湊出';
         resultPanel.setAttribute('aria-busy', 'false');
         return;
       }
@@ -440,18 +541,27 @@
       noSolution.hidden = true;
       content.hidden = false;
       status.classList.add('is-ready');
-      status.lastChild.textContent = '完成計算';
+      status.lastChild.textContent = result.allowChange ? '已找到付款組合' : '完成計算';
+      doc.getElementById('result-label').textContent = result.allowChange ? '目標金額' : '拆分金額';
       doc.getElementById('result-amount').textContent = formatCurrency(result.parsed.ticks);
       doc.getElementById('combination-count').textContent = `${result.ways.toLocaleString('zh-TW')} 種組合`;
+      const modeNote = doc.getElementById('result-mode-note');
+      modeNote.hidden = !result.allowChange;
+      modeNote.textContent = result.allowChange
+        ? `最多找回 NT$${MAX_CHANGE_TWD}；配法依找回金額由少到多排列，付剛好優先。代表解以找零最少的付款額計算。`
+        : '';
 
       const extremes = doc.getElementById('extremes');
       extremes.replaceChildren();
       const fewestSignature = solutionSignature(result.extremes.fewestPieces, result.denoms);
       const mostCoinsSignature = solutionSignature(result.extremes.mostCoins, result.denoms);
       const fewestNotesSignature = solutionSignature(result.extremes.fewestNotes, result.denoms);
-      renderExtreme(extremes, '最小解・件數最少', '少', result.extremes.fewestPieces, result.denoms, 'pieces', '件', true);
-      renderExtreme(extremes, '硬幣最多', '幣', result.extremes.mostCoins, result.denoms, 'coins', '枚');
-      renderExtreme(extremes, '最大解・紙鈔最少', '鈔', result.extremes.fewestNotes, result.denoms, 'notes', '張');
+      const paymentInfo = result.allowChange
+        ? `支付 ${formatCurrency(result.bestPaymentTicks)}・找回 ${formatCurrency(result.bestPaymentTicks - result.parsed.ticks)}`
+        : '';
+      renderExtreme(extremes, '最小解・件數最少', '少', result.extremes.fewestPieces, result.denoms, 'pieces', '件', true, paymentInfo);
+      renderExtreme(extremes, '硬幣最多', '幣', result.extremes.mostCoins, result.denoms, 'coins', '枚', false, paymentInfo);
+      renderExtreme(extremes, '最大解・紙鈔最少', '鈔', result.extremes.fewestNotes, result.denoms, 'notes', '張', false, paymentInfo);
 
       const list = doc.getElementById('combination-list');
       list.replaceChildren();
@@ -480,23 +590,33 @@
         breakdown.append(makeBreakdown(solution.counts, displayDenoms));
         body.append(summary, breakdown);
         const value = doc.createElement('span');
-        value.className = 'row-value';
-        value.textContent = formatCurrency(result.parsed.ticks);
+        value.className = `row-value${result.allowChange ? ' row-value-change' : ''}`;
+        if (result.allowChange) {
+          const payment = doc.createElement('strong');
+          payment.textContent = `支付 ${formatCurrency(solution.paymentTicks)}`;
+          const change = doc.createElement('span');
+          change.textContent = `找回 ${formatCurrency(solution.changeTicks)}`;
+          value.append(payment, change);
+        } else {
+          value.textContent = formatCurrency(result.parsed.ticks);
+        }
         row.append(number, body, value);
         list.append(row);
       });
 
       const countText = result.ways.toLocaleString('zh-TW');
       doc.getElementById('list-count').textContent = `${result.solutions.length.toLocaleString('zh-TW')} / ${countText} 組`;
-      doc.getElementById('list-caption').textContent = result.truncated ? '依面額由大到小列出可見組合' : '依總件數由少到多排列';
+      doc.getElementById('list-caption').textContent = result.allowChange
+        ? '依找回金額由少到多排列；付剛好優先，同找零再按件數排序'
+        : result.truncated ? '依面額由大到小列出可見組合' : '依總件數由少到多排列';
       const note = doc.getElementById('truncation-note');
       note.hidden = !result.truncated;
       const loadMore = doc.getElementById('load-more');
       const reachedDisplayLimit = result.solutions.length >= MAX_LIST_LIMIT;
       note.textContent = result.truncated
         ? reachedDisplayLimit
-          ? `共有 ${countText} 種精確組合；為保持頁面流暢，明細最多載入 ${MAX_LIST_LIMIT.toLocaleString('zh-TW')} 種。可取消部分面額篩選，縮小組合範圍。三種代表解仍依全部組合計算。`
-          : `共有 ${countText} 種精確組合，目前顯示 ${result.solutions.length.toLocaleString('zh-TW')} 種。三種代表解仍依全部組合計算。`
+          ? `${result.allowChange ? `找零上限 NT$${MAX_CHANGE_TWD} 內共有 ${countText} 種付款組合` : `共有 ${countText} 種精確組合`}；為保持頁面流暢，明細最多載入 ${MAX_LIST_LIMIT.toLocaleString('zh-TW')} 種。可取消部分面額篩選，縮小組合範圍。代表解仍依計算結果完整範圍計算。`
+          : `${result.allowChange ? `找零上限 NT$${MAX_CHANGE_TWD} 內共有 ${countText} 種付款組合` : `共有 ${countText} 種精確組合`}，目前顯示 ${result.solutions.length.toLocaleString('zh-TW')} 種。代表解仍依計算結果完整範圍計算。`
         : '';
       loadMore.hidden = !result.truncated || reachedDisplayLimit;
       loadMore.textContent = `再顯示 100 組（${result.solutions.length.toLocaleString('zh-TW')} / ${countText}）`;
@@ -529,6 +649,14 @@
     doc.getElementById('half-dollar').checked = preferences.halfEnabled;
     const modeControl = form.querySelector(`input[name="mode"][value="${preferences.mode}"]`);
     if (modeControl) modeControl.checked = true;
+    form.querySelectorAll('input[name="payment-scenario"]').forEach((control) => {
+      control.checked = (control.value === 'consumer') === preferences.allowChange;
+      control.addEventListener('change', () => {
+        preferences.allowChange = control.value === 'consumer';
+        savePreferences();
+        scheduleCalculation(true, true);
+      });
+    });
 
     amountInput.addEventListener('input', () => scheduleCalculation(false, true));
     amountInput.addEventListener('blur', () => {
@@ -587,6 +715,7 @@
     DENOMINATIONS,
     DEFAULT_SELECTED,
     MAX_AMOUNT_TWD,
+    MAX_CHANGE_TWD,
     LIST_LIMIT,
     MAX_LIST_LIMIT,
     parseAmount,
