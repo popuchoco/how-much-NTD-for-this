@@ -15,6 +15,7 @@ class MockElement {
     this.checked = false;
     this.value = '';
     this.textContent = '';
+    this.focusCount = 0;
   }
 
   set id(value) {
@@ -34,6 +35,7 @@ class MockElement {
   replaceChildren(...children) { this.children = []; this.append(...children); }
   setAttribute(name, value) { this.attributes.set(name, String(value)); }
   removeAttribute(name) { this.attributes.delete(name); }
+  focus() { this.focusCount += 1; }
   addEventListener(name, listener) { this.listeners[name] = listener; }
   querySelectorAll(selector) {
     const descendants = this.children.flatMap((child) => [child, ...child.querySelectorAll(selector)]);
@@ -71,6 +73,7 @@ function createMountDocument() {
   const form = doc.getElementById('makeup-form');
   doc.getElementById('makeup-status')._lastChild = { textContent: '等待輸入' };
   const inventoryMethodInputs = [doc.createElement('input'), doc.createElement('input')];
+  doc.inventoryMethodInputs = inventoryMethodInputs;
   inventoryMethodInputs[0].value = 'total';
   inventoryMethodInputs[1].value = 'denominations';
   inventoryMethodInputs[0].checked = true;
@@ -108,11 +111,107 @@ test('submit prevents navigation and renders a top-up result', () => {
   assert.equal(doc.getElementById('makeup-status').lastChild.textContent, '已找到補足配法');
 });
 
+test('invalid submit exposes the field error and a corrected retry succeeds', () => {
+  const doc = createMountDocument();
+  makeup.mount(doc);
+  const form = doc.getElementById('makeup-form');
+  const target = doc.getElementById('makeup-target');
+  const current = doc.getElementById('makeup-current-total');
+  const submit = () => form.listeners.submit({ preventDefault() {} });
+
+  target.value = 'abc';
+  current.value = '0';
+  submit();
+  assert.equal(doc.getElementById('makeup-target-error').hidden, false);
+  assert.equal(target.attributes.get('aria-invalid'), 'true');
+  assert.equal(target.focusCount, 1);
+  assert.equal(doc.getElementById('makeup-result-content').hidden, true);
+
+  target.value = '10';
+  const halfToggle = doc.getElementById('makeup-half-dollar');
+  halfToggle.checked = true;
+  halfToggle.listeners.change();
+  current.value = '2.5';
+  submit();
+  assert.equal(doc.getElementById('makeup-target-error').hidden, true);
+  assert.equal(target.attributes.has('aria-invalid'), false);
+  assert.equal(doc.getElementById('makeup-result-content').hidden, false);
+  assert.equal(doc.getElementById('makeup-remaining-value').textContent, 'NT$7.5');
+  assert.equal(doc.getElementById('makeup-status').lastChild.textContent, '已找到補足配法');
+});
+
+test('invalid current total focuses its field, then can be corrected and resubmitted', () => {
+  const doc = createMountDocument();
+  makeup.mount(doc);
+  const form = doc.getElementById('makeup-form');
+  const current = doc.getElementById('makeup-current-total');
+  doc.getElementById('makeup-target').value = '50';
+  current.value = '-1';
+  form.listeners.submit({ preventDefault() {} });
+
+  assert.equal(doc.getElementById('makeup-inventory-error').hidden, false);
+  assert.equal(current.attributes.get('aria-invalid'), 'true');
+  assert.equal(current.focusCount, 1);
+
+  current.value = '10';
+  form.listeners.submit({ preventDefault() {} });
+  assert.equal(doc.getElementById('makeup-inventory-error').hidden, true);
+  assert.equal(current.attributes.has('aria-invalid'), false);
+  assert.equal(doc.getElementById('makeup-remaining-value').textContent, 'NT$40');
+});
+
+test('denomination-count UI focuses a bad count and honors the enabled half-dollar row', () => {
+  const doc = createMountDocument();
+  makeup.mount(doc);
+  const form = doc.getElementById('makeup-form');
+  const halfToggle = doc.getElementById('makeup-half-dollar');
+  const halfCountRow = doc.getElementById('coin-half-count-row');
+  const halfCount = doc.getElementById('count-coin-half');
+  const oneDollarCount = doc.getElementById('count-coin-1');
+  const submit = () => form.listeners.submit({ preventDefault() {} });
+
+  doc.inventoryMethodInputs[0].checked = false;
+  doc.inventoryMethodInputs[1].checked = true;
+  doc.inventoryMethodInputs[1].listeners.change();
+  doc.getElementById('makeup-target').value = '2';
+  oneDollarCount.value = 'oops';
+  submit();
+  assert.equal(doc.getElementById('makeup-inventory-error').hidden, false);
+  assert.equal(oneDollarCount.attributes.get('aria-invalid'), 'true');
+  assert.equal(oneDollarCount.focusCount, 1);
+
+  oneDollarCount.value = '2';
+  halfToggle.checked = true;
+  halfToggle.listeners.change();
+  assert.equal(halfCountRow.hidden, false);
+  assert.equal(halfCount.disabled, false);
+  halfCount.value = '1';
+  doc.getElementById('makeup-target').value = '2.5';
+  submit();
+  assert.equal(doc.getElementById('makeup-inventory-error').hidden, true);
+  assert.equal(doc.getElementById('makeup-status').lastChild.textContent, '剛好達標');
+
+  halfToggle.checked = false;
+  halfToggle.listeners.change();
+  assert.equal(halfCountRow.hidden, true);
+  assert.equal(halfCount.disabled, true);
+  assert.equal(halfCount.value, '0');
+});
+
 test('parses held totals including zero, grouped thousands, and optional half dollars', () => {
   assert.deepEqual(makeup.parseInventoryAmount('0', false), { ok: true, ticks: 0n });
   assert.equal(makeup.parseInventoryAmount('1,200.5', true).ticks, 2401n);
+  assert.equal(makeup.parseInventoryAmount('.5', true).ticks, 1n);
+  assert.equal(makeup.parseInventoryAmount('.5', false).ok, false);
   assert.equal(makeup.parseInventoryAmount('1,200.5', false).ok, false);
   assert.equal(makeup.parseInventoryAmount('1,20', true).ok, false);
+});
+
+test('missing or null options return validation results instead of throwing', () => {
+  assert.doesNotThrow(() => makeup.calculateTopUp());
+  assert.equal(makeup.calculateTopUp().field, 'target');
+  assert.equal(makeup.calculateTopUp(null).field, 'target');
+  assert.equal(makeup.calculateTopUp({ target: '1', currentAmount: '0', listLimit: Symbol('invalid') }).ok, true);
 });
 
 test('rejects empty, non-numeric, malformed, non-positive, and over-limit targets', () => {

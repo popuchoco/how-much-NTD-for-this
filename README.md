@@ -27,6 +27,7 @@
 ## 文件
 
 - [`ARCHITECTURE.md`](ARCHITECTURE.md)：資料模型、演算法、限制與程式審查追蹤。
+- [`TEST_PLAN.md`](TEST_PLAN.md)：回歸測試範圍、使用者試錯情境與人工瀏覽器驗收矩陣。
 - [`DESIGN.md`](DESIGN.md)：跨頁視覺方向與無障礙基線。
 - [`life-applications.html`](life-applications.html)：依政府數學課程與二年級教材學習重點設計的生活練習頁；情境為原創，不是官方教材題目。
 - [`make-up.html`](make-up.html) 與 [`make-up.js`](make-up.js)：以已持有金額或面額數量計算目標差額及補足配法。

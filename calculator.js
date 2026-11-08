@@ -43,7 +43,8 @@
   }
 
   function parseAmount(raw, allowHalf, maximum = MAX_AMOUNT_TWD) {
-    const input = String(raw ?? '').trim();
+    const rawInput = String(raw ?? '').trim();
+    const input = allowHalf && rawInput === '.5' ? '0.5' : rawInput;
     if (!input) return { ok: false, reason: '請先輸入金額。' };
     const grouped = /^(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.5)?$/;
     const wholeOnly = /^(?:\d{1,3}(?:,\d{3})+|\d+)$/;
@@ -62,12 +63,13 @@
   }
 
   function denominationChoices(selection, mode, halfEnabled) {
-    const selected = selection instanceof Set ? selection : new Set(selection || []);
+    const selected = selection instanceof Set ? selection : new Set(Array.isArray(selection) ? selection : []);
+    const safeMode = ['all', 'notes', 'coins'].includes(mode) ? mode : 'all';
     return DENOMINATIONS.filter((denom) => {
       if (!selected.has(denom.id)) return false;
       if (denom.id === 'coin-half' && !halfEnabled) return false;
-      if (mode === 'notes' && denom.kind !== 'note') return false;
-      if (mode === 'coins' && denom.kind !== 'coin') return false;
+      if (safeMode === 'notes' && denom.kind !== 'note') return false;
+      if (safeMode === 'coins' && denom.kind !== 'coin') return false;
       return true;
     });
   }
@@ -231,6 +233,17 @@
     });
   }
 
+  function normalizeListLimit(value) {
+    let parsed;
+    try {
+      parsed = Number(value);
+    } catch {
+      return LIST_LIMIT;
+    }
+    if (!Number.isFinite(parsed)) return LIST_LIMIT;
+    return Math.min(MAX_LIST_LIMIT, Math.max(1, Math.floor(parsed)));
+  }
+
   function calculateExactly(parsed, denoms, listLimit, allowChange = false) {
     if (!denoms.length) {
       return {
@@ -335,13 +348,23 @@
     };
   }
 
-  function calculate({ amount, allowHalf, mode = 'all', selection = DEFAULT_SELECTED, listLimit = LIST_LIMIT, allowChange = false }) {
+  function calculate(options = {}) {
+    const safeOptions = options && typeof options === 'object' ? options : {};
+    const {
+      amount,
+      allowHalf = false,
+      mode = 'all',
+      selection = DEFAULT_SELECTED,
+      listLimit = LIST_LIMIT,
+      allowChange = false,
+    } = safeOptions;
     const parsed = parseAmount(amount, allowHalf);
     if (!parsed.ok) return { ok: false, error: parsed.reason };
     const denoms = denominationChoices(selection, mode, allowHalf);
+    const safeListLimit = normalizeListLimit(listLimit);
     return allowChange
-      ? calculateAllowingChange(parsed, denoms, listLimit)
-      : calculateExactly(parsed, denoms, listLimit);
+      ? calculateAllowingChange(parsed, denoms, safeListLimit)
+      : calculateExactly(parsed, denoms, safeListLimit);
   }
 
   function mount(doc) {

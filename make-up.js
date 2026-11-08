@@ -16,7 +16,8 @@
   const WHOLE_AMOUNT_PATTERN = /^(?:\d{1,3}(?:,\d{3})+|\d+)$/;
 
   function parseInventoryAmount(raw, allowHalf) {
-    const input = String(raw ?? '').trim();
+    const rawInput = String(raw ?? '').trim();
+    const input = allowHalf && rawInput === '.5' ? '0.5' : rawInput;
     if (input === '0') return { ok: true, ticks: 0n };
     const pattern = allowHalf ? INPUT_AMOUNT_PATTERN : WHOLE_AMOUNT_PATTERN;
     if (!pattern.test(input)) {
@@ -50,7 +51,28 @@
     return ticks % 2n ? `${whole}.5` : String(whole);
   }
 
-  function calculateTopUp({ target, inventoryMethod = 'total', currentAmount = '0', counts = {}, allowHalf = false, mode = 'all', listLimit = LIST_LIMIT }) {
+  function normalizeListLimit(value) {
+    let parsed;
+    try {
+      parsed = Number(value);
+    } catch {
+      return LIST_LIMIT;
+    }
+    if (!Number.isFinite(parsed)) return LIST_LIMIT;
+    return Math.min(MAX_LIST_LIMIT, Math.max(1, Math.floor(parsed)));
+  }
+
+  function calculateTopUp(options = {}) {
+    const safeOptions = options && typeof options === 'object' ? options : {};
+    const {
+      target,
+      inventoryMethod = 'total',
+      currentAmount = '0',
+      counts = {},
+      allowHalf = false,
+      mode = 'all',
+      listLimit = LIST_LIMIT,
+    } = safeOptions;
     const parsedTarget = calculator.parseAmount(target, allowHalf);
     if (!parsedTarget.ok) return { ok: false, error: parsedTarget.reason, field: 'target' };
     const targetTicks = BigInt(parsedTarget.ticks);
@@ -84,7 +106,7 @@
       allowHalf,
       mode: ['all', 'notes', 'coins'].includes(mode) ? mode : 'all',
       selection,
-      listLimit: Math.min(Math.max(Number(listLimit) || LIST_LIMIT, 1), MAX_LIST_LIMIT),
+      listLimit: normalizeListLimit(listLimit),
     });
     if (!calculation.ok) return { ok: false, error: calculation.error, field: 'target' };
     return { ok: true, status: 'needs-more', targetTicks, currentTicks, remainingTicks, calculation };

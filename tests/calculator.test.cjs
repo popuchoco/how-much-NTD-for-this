@@ -9,12 +9,29 @@ test('parses whole-dollar amounts and grouped thousands', () => {
   assert.equal(calc.parseAmount('1280', false).ticks, 2560);
   assert.equal(calc.parseAmount('1,280', false).ticks, 2560);
   assert.equal(calc.parseAmount('1,280.5', true).ticks, 2561);
+  assert.equal(calc.parseAmount('.5', true).ticks, 1);
+  assert.equal(calc.parseAmount('.5', false).ok, false);
   assert.equal(calc.parseAmount('200,000', false).ok, true);
   assert.equal(calc.parseAmount('200,001', false).ok, false);
   assert.equal(calc.parseAmount('12.5', false).ok, false);
   assert.equal(calc.parseAmount('1,28', true).ok, false);
   assert.equal(calc.parseAmount('0', false).ok, false);
   assert.equal(calc.parseAmount('200,000.5', true).ok, false);
+});
+
+test('invalid API option shapes and list limits fail safely', () => {
+  assert.equal(calc.calculate().ok, false);
+  assert.equal(calc.calculate(null).ok, false);
+  const invalidSelection = calc.calculate({ amount: '1', selection: {} });
+  assert.equal(invalidSelection.ok, true);
+  assert.equal(invalidSelection.ways, 0n);
+
+  for (const listLimit of [0, -1, 2.7, Number.NaN, Number.POSITIVE_INFINITY, 'not-a-number', 10000, Symbol('invalid')]) {
+    const result = calc.calculate({ amount: '500', selection: new Set(['coin-5', 'coin-1']), listLimit });
+    assert.equal(result.ok, true, `list limit should not crash: ${String(listLimit)}`);
+    assert.ok(result.solutions.length >= 1);
+    assert.ok(result.solutions.length <= calc.MAX_LIST_LIMIT);
+  }
 });
 
 test('empty denomination selection returns a clear no-solution reason', () => {
