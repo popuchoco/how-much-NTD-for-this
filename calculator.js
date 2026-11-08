@@ -307,7 +307,7 @@
         truncated: false,
         allowChange: true,
         maxChangeTicks: MAX_CHANGE_TICKS,
-        noSolutionReason: `目前選取的面額，在最多找零 NT$${MAX_CHANGE_TWD} 的範圍內仍無法組成付款金額；可重新選擇面額或切換使用方式。`,
+        noSolutionReason: `目前選取的面額在找零上限 NT$${MAX_CHANGE_TWD} 內仍無可用的付款組合；可重新選擇面額或切換使用方式。`,
       };
     }
 
@@ -548,7 +548,7 @@
       const modeNote = doc.getElementById('result-mode-note');
       modeNote.hidden = !result.allowChange;
       modeNote.textContent = result.allowChange
-        ? `最多找回 NT$${MAX_CHANGE_TWD}；配法依找回金額由少到多排列，付剛好優先。代表解以找零最少的付款額計算。`
+        ? `最多可找零 NT$${MAX_CHANGE_TWD}；配法依找零金額由少到多排列，付剛好優先。代表解以找零最少的付款額計算。`
         : '';
 
       const extremes = doc.getElementById('extremes');
@@ -557,7 +557,7 @@
       const mostCoinsSignature = solutionSignature(result.extremes.mostCoins, result.denoms);
       const fewestNotesSignature = solutionSignature(result.extremes.fewestNotes, result.denoms);
       const paymentInfo = result.allowChange
-        ? `支付 ${formatCurrency(result.bestPaymentTicks)}・找回 ${formatCurrency(result.bestPaymentTicks - result.parsed.ticks)}`
+        ? `支付 ${formatCurrency(result.bestPaymentTicks)}・找零 ${formatCurrency(result.bestPaymentTicks - result.parsed.ticks)}`
         : '';
       renderExtreme(extremes, '最小解・件數最少', '少', result.extremes.fewestPieces, result.denoms, 'pieces', '件', true, paymentInfo);
       renderExtreme(extremes, '硬幣最多', '幣', result.extremes.mostCoins, result.denoms, 'coins', '枚', false, paymentInfo);
@@ -595,7 +595,7 @@
           const payment = doc.createElement('strong');
           payment.textContent = `支付 ${formatCurrency(solution.paymentTicks)}`;
           const change = doc.createElement('span');
-          change.textContent = `找回 ${formatCurrency(solution.changeTicks)}`;
+          change.textContent = `找零 ${formatCurrency(solution.changeTicks)}`;
           value.append(payment, change);
         } else {
           value.textContent = formatCurrency(result.parsed.ticks);
@@ -607,7 +607,7 @@
       const countText = result.ways.toLocaleString('zh-TW');
       doc.getElementById('list-count').textContent = `${result.solutions.length.toLocaleString('zh-TW')} / ${countText} 組`;
       doc.getElementById('list-caption').textContent = result.allowChange
-        ? '依找回金額由少到多排列；付剛好優先，同找零再按件數排序'
+        ? '依找零金額由少到多排列；付剛好優先，同找零再按件數排序'
         : result.truncated ? '依面額由大到小列出可見組合' : '依總件數由少到多排列';
       const note = doc.getElementById('truncation-note');
       note.hidden = !result.truncated;

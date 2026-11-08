@@ -76,7 +76,7 @@ test('consumer payment mode uses NT$20 coins instead of requiring $1, $5, or $10
 test('consumer payment mode caps change at NT$20 and respects selected use mode', () => {
   const tooMuchChange = calc.calculate({ amount: '25', allowHalf: false, selection: new Set(['coin-50']), allowChange: true });
   assert.equal(tooMuchChange.ways, 0n); // NT$50 would require NT$25 change.
-  assert.match(tooMuchChange.noSolutionReason, /最多找零 NT\$20/);
+  assert.match(tooMuchChange.noSolutionReason, /找零上限 NT\$20/);
 
   const notesOnly = calc.calculate({
     amount: '95',

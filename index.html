@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#edf1ee" />
-    <meta name="description" content="輸入新台幣金額，查看精確拆分，或在消費者情境中多付並找回最多 NT$20。" />
+    <meta name="description" content="輸入新台幣金額，查看精確拆分，或多付一些並由店家找零（上限 NT$20）。" />
     <title>新台幣拆鈔計算器｜現金怎麼配</title>
     <link rel="stylesheet" href="./styles.css" />
     <script src="./calculator.js" defer></script>
@@ -35,7 +35,7 @@
       <section class="intro" id="top" aria-labelledby="page-title">
         <p class="eyebrow"><span class="eyebrow-line"></span>新台幣拆鈔計算器</p>
         <h1 id="page-title">一筆金額，<br class="mobile-break" />有幾種配法？</h1>
-        <p class="intro-copy">輸入金額，查看紙鈔與硬幣的配法；可選擇付剛好，或使用消費者情境允許找零最多 NT$20。只算一般流通面額，不含紀念幣或特殊鈔券。</p>
+        <p class="intro-copy">輸入金額，查看紙鈔與硬幣的配法；可選擇付剛好，或多付一些並由店家找零（上限 NT$20）。只算一般流通面額，不含紀念幣或特殊鈔券。</p>
       </section>
 
       <section class="calculator-layout" aria-label="現金拆分工具">
@@ -68,8 +68,8 @@
                 </label>
                 <label class="mode-option payment-scenario-option">
                   <input type="radio" name="payment-scenario" value="consumer" />
-                  <span>消費者付款</span>
-                  <small>可找回最多 NT$20</small>
+                  <span>多付再找零</span>
+                  <small>找零上限 NT$20</small>
                 </label>
               </div>
             </fieldset>
