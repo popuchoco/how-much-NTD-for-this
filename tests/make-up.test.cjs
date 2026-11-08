@@ -2,6 +2,74 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const makeup = require('../make-up.js');
 
+class MockElement {
+  constructor(doc, tagName = 'div') {
+    this.doc = doc;
+    this.tagName = tagName;
+    this.children = [];
+    this.dataset = {};
+    this.listeners = {};
+    this.attributes = new Map();
+    this.hidden = false;
+    this.disabled = false;
+    this.checked = false;
+    this.value = '';
+  }
+
+  set id(value) {
+    this._id = value;
+    if (value) this.doc.elements.set(value, this);
+  }
+
+  get id() { return this._id; }
+
+  append(...children) { this.children.push(...children); }
+  replaceChildren(...children) { this.children = [...children]; }
+  setAttribute(name, value) { this.attributes.set(name, String(value)); }
+  removeAttribute(name) { this.attributes.delete(name); }
+  addEventListener(name, listener) { this.listeners[name] = listener; }
+}
+
+class MockDocument {
+  constructor() { this.elements = new Map(); }
+
+  createElement(tagName) { return new MockElement(this, tagName); }
+  createElementNS(_namespace, tagName) { return this.createElement(tagName); }
+  getElementById(id) { return this.elements.get(id) || null; }
+  addElement(id, tagName) {
+    const element = this.createElement(tagName);
+    element.id = id;
+    return element;
+  }
+}
+
+function createMountDocument() {
+  const doc = new MockDocument();
+  const ids = [
+    'makeup-form', 'makeup-target', 'makeup-current-total', 'inventory-total-panel',
+    'inventory-counts-panel', 'inventory-counts', 'makeup-results-panel', 'makeup-status',
+    'makeup-target-error', 'makeup-inventory-error', 'makeup-load-more', 'makeup-half-dollar',
+  ];
+  ids.forEach((id) => doc.addElement(id, id.includes('form') || id.includes('panel') || id.includes('counts') ? 'form' : 'div'));
+
+  const form = doc.getElementById('makeup-form');
+  const inventoryMethodInputs = [doc.createElement('input'), doc.createElement('input')];
+  inventoryMethodInputs[0].checked = true;
+  const modeInputs = [doc.createElement('input'), doc.createElement('input'), doc.createElement('input')];
+  modeInputs[0].checked = true;
+  form.querySelectorAll = (selector) => selector.includes('inventory-method') ? inventoryMethodInputs : modeInputs;
+  return doc;
+}
+
+test('mount creates half-dollar controls before looking them up and binds form submission', () => {
+  const doc = createMountDocument();
+
+  assert.doesNotThrow(() => makeup.mount(doc));
+  assert.equal(doc.getElementById('coin-half-count-row').hidden, true);
+  assert.equal(doc.getElementById('count-coin-half').disabled, true);
+  assert.equal(typeof doc.getElementById('makeup-form').listeners.submit, 'function');
+});
+
 test('parses held totals including zero, grouped thousands, and optional half dollars', () => {
   assert.deepEqual(makeup.parseInventoryAmount('0', false), { ok: true, ticks: 0n });
   assert.equal(makeup.parseInventoryAmount('1,200.5', true).ticks, 2401n);

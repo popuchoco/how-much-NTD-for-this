@@ -103,7 +103,6 @@
     const inventoryTotalPanel = doc.getElementById('inventory-total-panel');
     const inventoryCountsPanel = doc.getElementById('inventory-counts-panel');
     const inventoryCounts = doc.getElementById('inventory-counts');
-    const halfCountRow = doc.getElementById('coin-half-count-row');
     const resultPanel = doc.getElementById('makeup-results-panel');
     const status = doc.getElementById('makeup-status');
     const targetError = doc.getElementById('makeup-target-error');
@@ -138,7 +137,9 @@
     }
 
     function updateHalfCountRow() {
+      const halfCountRow = doc.getElementById('coin-half-count-row');
       const halfInput = doc.getElementById('count-coin-half');
+      if (!halfCountRow || !halfInput) return;
       halfCountRow.hidden = !allowHalfInput.checked;
       halfInput.disabled = !allowHalfInput.checked;
       if (!allowHalfInput.checked) halfInput.value = '0';
