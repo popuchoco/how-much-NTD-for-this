@@ -273,7 +273,7 @@
       });
 
       const countText = result.ways.toLocaleString('zh-TW');
-      doc.getElementById('makeup-list-count').textContent = `${result.solutions.length.toLocaleString('zh-TW')} / ${countText} 組`;
+      doc.getElementById('makeup-combination-count').textContent = `${result.solutions.length.toLocaleString('zh-TW')} / ${countText} 組`;
       const note = doc.getElementById('makeup-truncation-note');
       const maxed = result.solutions.length >= MAX_LIST_LIMIT;
       note.hidden = !result.truncated;
@@ -332,7 +332,6 @@
       renderExtreme(extremes, '硬幣最多', '幣', calculation.extremes.mostCoins, calculation.denoms, 'coins', '枚');
       renderExtreme(extremes, '紙鈔最少', '鈔', calculation.extremes.fewestNotes, calculation.denoms, 'notes', '張');
       solutionSection.hidden = false;
-      doc.getElementById('makeup-combination-count').textContent = `${calculation.ways.toLocaleString('zh-TW')} 種配法`;
       renderSolutions(calculation);
       status.lastChild.textContent = '已找到補足配法';
     }

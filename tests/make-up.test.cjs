@@ -14,6 +14,7 @@ class MockElement {
     this.disabled = false;
     this.checked = false;
     this.value = '';
+    this.textContent = '';
   }
 
   set id(value) {
@@ -23,11 +24,21 @@ class MockElement {
 
   get id() { return this._id; }
 
-  append(...children) { this.children.push(...children); }
-  replaceChildren(...children) { this.children = [...children]; }
+  get lastChild() { return this.children.at(-1) || this._lastChild || null; }
+  append(...children) {
+    children.forEach((child) => {
+      if (child.tagName === '#document-fragment') this.children.push(...child.children);
+      else this.children.push(child);
+    });
+  }
+  replaceChildren(...children) { this.children = []; this.append(...children); }
   setAttribute(name, value) { this.attributes.set(name, String(value)); }
   removeAttribute(name) { this.attributes.delete(name); }
   addEventListener(name, listener) { this.listeners[name] = listener; }
+  querySelectorAll(selector) {
+    const descendants = this.children.flatMap((child) => [child, ...child.querySelectorAll(selector)]);
+    return selector === 'input' ? descendants.filter((element) => element.tagName === 'input') : [];
+  }
 }
 
 class MockDocument {
@@ -35,6 +46,7 @@ class MockDocument {
 
   createElement(tagName) { return new MockElement(this, tagName); }
   createElementNS(_namespace, tagName) { return this.createElement(tagName); }
+  createDocumentFragment() { return this.createElement('#document-fragment'); }
   getElementById(id) { return this.elements.get(id) || null; }
   addElement(id, tagName) {
     const element = this.createElement(tagName);
@@ -49,13 +61,23 @@ function createMountDocument() {
     'makeup-form', 'makeup-target', 'makeup-current-total', 'inventory-total-panel',
     'inventory-counts-panel', 'inventory-counts', 'makeup-results-panel', 'makeup-status',
     'makeup-target-error', 'makeup-inventory-error', 'makeup-load-more', 'makeup-half-dollar',
+    'makeup-empty-state', 'makeup-result-content', 'makeup-needs-more', 'makeup-already-enough',
+    'makeup-no-solution', 'makeup-extremes', 'makeup-solutions-section', 'makeup-target-value',
+    'makeup-current-value', 'makeup-remaining-value', 'makeup-surplus-value', 'makeup-no-solution-message',
+    'makeup-combination-count', 'makeup-combination-list', 'makeup-truncation-note',
   ];
   ids.forEach((id) => doc.addElement(id, id.includes('form') || id.includes('panel') || id.includes('counts') ? 'form' : 'div'));
 
   const form = doc.getElementById('makeup-form');
+  doc.getElementById('makeup-status')._lastChild = { textContent: '等待輸入' };
   const inventoryMethodInputs = [doc.createElement('input'), doc.createElement('input')];
+  inventoryMethodInputs[0].value = 'total';
+  inventoryMethodInputs[1].value = 'denominations';
   inventoryMethodInputs[0].checked = true;
   const modeInputs = [doc.createElement('input'), doc.createElement('input'), doc.createElement('input')];
+  modeInputs[0].value = 'all';
+  modeInputs[1].value = 'notes';
+  modeInputs[2].value = 'coins';
   modeInputs[0].checked = true;
   form.querySelectorAll = (selector) => selector.includes('inventory-method') ? inventoryMethodInputs : modeInputs;
   return doc;
@@ -68,6 +90,22 @@ test('mount creates half-dollar controls before looking them up and binds form s
   assert.equal(doc.getElementById('coin-half-count-row').hidden, true);
   assert.equal(doc.getElementById('count-coin-half').disabled, true);
   assert.equal(typeof doc.getElementById('makeup-form').listeners.submit, 'function');
+});
+
+test('submit prevents navigation and renders a top-up result', () => {
+  const doc = createMountDocument();
+  makeup.mount(doc);
+  doc.getElementById('makeup-target').value = '1';
+  doc.getElementById('makeup-current-total').value = '0';
+
+  let prevented = false;
+  doc.getElementById('makeup-form').listeners.submit({ preventDefault() { prevented = true; } });
+
+  assert.equal(prevented, true);
+  assert.equal(doc.getElementById('makeup-result-content').hidden, false);
+  assert.equal(doc.getElementById('makeup-remaining-value').textContent, 'NT$1');
+  assert.equal(doc.getElementById('makeup-combination-count').textContent, '1 / 1 組');
+  assert.equal(doc.getElementById('makeup-status').lastChild.textContent, '已找到補足配法');
 });
 
 test('parses held totals including zero, grouped thousands, and optional half dollars', () => {
